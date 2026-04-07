@@ -293,6 +293,18 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** None  
 **Last updated:** Step 16
 
+### `server/GameRoom.ts`
+**Location:** server/GameRoom.ts  
+**Responsibility:** Per-room game loop at 20Hz. Manages boats, traps, gators. Processes buffered inputs, runs physics, broadcasts WorldState.  
+**Dependencies:** ws, shared/types, shared/constants, shared/MapGenerator, server/Physics, server/PhysicsHelpers  
+**Last updated:** Step 17
+
+### `shared/MapGenerator.ts`
+**Location:** shared/MapGenerator.ts  
+**Responsibility:** Procedural swamp map generation. Used by both server (GameRoom) and client (rendering).  
+**Dependencies:** shared/constants  
+**Last updated:** Step 17
+
 ### `server/Physics.ts`
 **Location:** server/Physics.ts  
 **Responsibility:** Stateless server-authoritative physics functions: boat movement, boat-to-boat collision, trap collection, gator contact, net stun.  

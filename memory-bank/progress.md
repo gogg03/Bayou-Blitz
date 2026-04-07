@@ -179,3 +179,12 @@ Proceeding to Phase 5 - Step 16.
 **Summary:** Built server/Physics.ts and server/PhysicsHelpers.ts with stateless physics functions: boat movement (momentum, drag, drift, tile collision), boat-to-boat collision (momentum transfer), trap proximity collection, gator zone contact (knockback + stun), and net stun. Consolidated all physics constants into shared/constants.ts. Client GameConfig.ts now re-exports from shared.  
 **Test result:** Passed — Unit tests verify correct velocity changes, collision responses, trap collection, and gator stun.  
 **Git commit:** Step 16 — Server physics engine
+
+---
+
+## Step 17 — Game Room Loop
+**Status:** Complete  
+**Date:** 2026-04-06  
+**Summary:** Built server/GameRoom.ts with 20Hz game loop. Each tick processes buffered inputs, advances physics, updates gator patrols, and broadcasts WorldState to all clients. Moved MapGenerator to shared/ for server access. Server creates GameRoom per room, adds/removes boats on join/leave.  
+**Test result:** Passed — Two connected clients both receive STATE messages at 20Hz, world state contains 2 boats and 15 traps. Input events processed correctly.  
+**Git commit:** Step 17 — Game room loop
