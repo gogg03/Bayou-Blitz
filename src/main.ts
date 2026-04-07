@@ -12,6 +12,7 @@ import { HUD } from './ui/HUD';
 import { LobbyScreen } from './ui/LobbyScreen';
 import { RoundSummary } from './ui/RoundSummary';
 import { AudioManager } from './audio/AudioManager';
+import { ParticleSystem } from './rendering/ParticleSystem';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001/ws';
 
@@ -28,6 +29,7 @@ const interpolator = new Interpolator();
 const hud = new HUD();
 const lobby = new LobbyScreen();
 const roundSummary = new RoundSummary();
+const particles = new ParticleSystem(sceneManager.scene);
 const audio = new AudioManager();
 const network = new NetworkClient(WS_URL);
 
@@ -115,11 +117,15 @@ function animate(): void {
       hud.updateCooldown(localBoat.netCooldown);
       const speed = Math.sqrt(localBoat.velocity.x ** 2 + localBoat.velocity.y ** 2);
       audio.updateEngine(speed);
-      if (localBoat.isStunned && !prevStunned) audio.playSplash();
+      if (localBoat.isStunned && !prevStunned) {
+        audio.playSplash();
+        particles.spawnSplash(localBoat.position.x, localBoat.position.y);
+      }
       prevStunned = localBoat.isStunned;
     }
   }
 
+  particles.update(1 / 60);
   sceneManager.render();
   requestAnimationFrame(animate);
 }

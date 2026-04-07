@@ -347,6 +347,12 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** three, shared/types  
 **Last updated:** Step 21
 
+### `src/rendering/ParticleSystem.ts`
+**Location:** src/rendering/ParticleSystem.ts  
+**Responsibility:** Lightweight particle system for splash effects. Pool-limited, gravity-based, fading opacity.  
+**Dependencies:** three  
+**Last updated:** Step 30
+
 ### `src/audio/AudioManager.ts`
 **Location:** src/audio/AudioManager.ts  
 **Responsibility:** Web Audio API synthesized sound effects. Engine hum, splash, gator growl, net fire. Mute toggle.  

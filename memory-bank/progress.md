@@ -325,3 +325,12 @@ Proceeding to Phase 5 - Step 16.
 **Summary:** Built AudioManager.ts using Web Audio API with synthesized sounds. Ambient hum, sawtooth engine sound with speed-based pitch, white noise splash SFX on knockback, low growl for gator contact, ping for net fire. Muted by default with HUD toggle button. AudioContext initialized on first user interaction.  
 **Test result:** Passed — Zero type errors.  
 **Git commit:** Step 29 — Audio
+
+---
+
+## Step 30 — Visual Polish
+**Status:** Complete  
+**Date:** 2026-04-07  
+**Summary:** Added ParticleSystem.ts for splash effects on knockback (blue spheres with gravity, fading opacity). Trap markers already have neon glow (wireframe + transparent sphere). Scene fog adds atmospheric depth. Particle pool capped at 50 for performance.  
+**Test result:** Passed — Zero type errors.  
+**Git commit:** Step 30 — Visual polish
