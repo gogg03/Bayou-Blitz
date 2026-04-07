@@ -188,3 +188,12 @@ Proceeding to Phase 5 - Step 16.
 **Summary:** Built server/GameRoom.ts with 20Hz game loop. Each tick processes buffered inputs, advances physics, updates gator patrols, and broadcasts WorldState to all clients. Moved MapGenerator to shared/ for server access. Server creates GameRoom per room, adds/removes boats on join/leave.  
 **Test result:** Passed — Two connected clients both receive STATE messages at 20Hz, world state contains 2 boats and 15 traps. Input events processed correctly.  
 **Git commit:** Step 17 — Game room loop
+
+---
+
+## Step 18 — Remove Client-Side Physics
+**Status:** Complete  
+**Date:** 2026-04-06  
+**Summary:** Deleted LocalPhysics.ts. Built NetworkClient.ts for WebSocket connection to server. Built GameState.ts as client-side world state mirror. Main.ts now renders boat positions from server state only. Input sent to server each frame.  
+**Test result:** Passed — Client connects to server, receives world state, renders boats at server-authoritative positions. Zero type errors.  
+**Git commit:** Step 18 — Remove client-side physics

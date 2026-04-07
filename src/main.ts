@@ -2,52 +2,65 @@ import { SceneManager } from './rendering/SceneManager';
 import { MapRenderer } from './rendering/MapRenderer';
 import { BoatRenderer } from './rendering/BoatRenderer';
 import { InputController } from './input/InputController';
-import { generateMap } from './game/MapGenerator';
-import { createLocalBoat, updateLocalBoat } from './game/LocalPhysics';
+import { NetworkClient } from './network/NetworkClient';
+import { GameState } from './game/GameState';
 
-if (import.meta.env.DEV) {
-  console.log('WS_URL:', import.meta.env.VITE_WS_URL);
-  console.log('API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
-}
+const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001/ws';
 
 const app = document.getElementById('app')!;
 const sceneManager = new SceneManager(app);
 const mapRenderer = new MapRenderer(sceneManager.scene);
 const boatRenderer = new BoatRenderer(sceneManager.scene);
 const inputController = new InputController();
+const gameState = new GameState();
+const network = new NetworkClient(WS_URL);
 
-let currentMap = generateMap();
-mapRenderer.renderMap(currentMap);
+const knownBoats = new Set<string>();
 
-const localBoat = createLocalBoat(0, 0);
+network.onAssigned((playerId, roomId) => {
+  gameState.setPlayer(playerId, roomId);
+  console.log(`Assigned: player=${playerId}, room=${roomId}`);
+});
 
-boatRenderer.createBoat('local', 0xcc4422);
-boatRenderer.updateBoat('local', 0, 0, 0);
-sceneManager.setFollowTarget(0, 0);
+network.onWorldState((worldState, tiles) => {
+  gameState.updateFromServer(worldState, tiles);
 
-const devWindow = window as unknown as Record<string, unknown>;
+  if (gameState.tiles && !mapRenderer.hasRendered()) {
+    mapRenderer.renderMap(gameState.tiles);
+  }
 
-devWindow.nextMap = () => {
-  currentMap = generateMap();
-  mapRenderer.renderMap(currentMap);
-  localBoat.x = 0;
-  localBoat.z = 0;
-  localBoat.vx = 0;
-  localBoat.vz = 0;
-};
+  const activeIds = new Set<string>();
+  for (const boat of worldState.boats) {
+    activeIds.add(boat.id);
+    if (!knownBoats.has(boat.id)) {
+      const isLocal = boat.id === gameState.localPlayerId;
+      boatRenderer.createBoat(boat.id, isLocal ? 0xcc4422 : 0x2266aa);
+      knownBoats.add(boat.id);
+    }
+    boatRenderer.updateBoat(boat.id, boat.position.x, boat.position.y, boat.rotation);
+  }
 
-let lastTime = performance.now();
+  for (const id of knownBoats) {
+    if (!activeIds.has(id)) {
+      boatRenderer.removeBoat(id);
+      knownBoats.delete(id);
+    }
+  }
+
+  const localBoat = worldState.boats.find(b => b.id === gameState.localPlayerId);
+  if (localBoat) {
+    sceneManager.setFollowTarget(localBoat.position.x, localBoat.position.y);
+  }
+});
+
+network.connect('Player');
 
 function animate(): void {
-  const now = performance.now();
-  const dt = Math.min((now - lastTime) / 1000, 0.05);
-  lastTime = now;
+  if (gameState.localPlayerId) {
+    const input = inputController.getInput(gameState.localPlayerId);
+    network.sendInput(input);
+  }
 
-  const input = inputController.getInput('local');
-  updateLocalBoat(localBoat, input, dt, currentMap);
-
-  boatRenderer.updateBoat('local', localBoat.x, localBoat.z, localBoat.rotation);
-  sceneManager.setFollowTarget(localBoat.x, localBoat.z);
   sceneManager.render();
   requestAnimationFrame(animate);
 }

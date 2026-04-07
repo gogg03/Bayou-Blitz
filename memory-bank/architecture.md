@@ -335,17 +335,17 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** ws, shared/types  
 **Last updated:** Step 14
 
-### `src/game/LocalPhysics.ts`
-**Location:** src/game/LocalPhysics.ts  
-**Responsibility:** Temporary client-side airboat physics for visual testing. Handles momentum, drag, drift, tile collision. Will be replaced by server-authoritative physics in Step 18.  
-**Dependencies:** shared/types, constants/GameConfig, constants/BoatConfig  
-**Last updated:** Step 12
+### `src/network/NetworkClient.ts`
+**Location:** src/network/NetworkClient.ts  
+**Responsibility:** WebSocket client. Connects to server, sends JOIN/INPUT messages, receives ASSIGN_ID/STATE messages. Callbacks for world state and player assignment.  
+**Dependencies:** shared/types, shared/constants  
+**Last updated:** Step 18
 
-### `src/constants/BoatConfig.ts`
-**Location:** src/constants/BoatConfig.ts  
-**Responsibility:** Boat physics constants: acceleration, drag, turn speed, max speed, drift factor.  
-**Dependencies:** None  
-**Last updated:** Step 12
+### `src/game/GameState.ts`
+**Location:** src/game/GameState.ts  
+**Responsibility:** Client-side read-only mirror of server world state. Stores latest WorldState, tiles, local player ID, and room ID.  
+**Dependencies:** shared/types, shared/constants  
+**Last updated:** Step 18
 
 ### `src/input/InputController.ts`
 **Location:** src/input/InputController.ts  

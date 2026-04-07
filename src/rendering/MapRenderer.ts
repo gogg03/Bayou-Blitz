@@ -4,6 +4,7 @@ import { TILE_SIZE, TileType, TILE_COLORS } from '../constants/GameConfig';
 export class MapRenderer {
   private mapGroup: THREE.Group;
   private scene: THREE.Scene;
+  private rendered = false;
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
@@ -11,7 +12,12 @@ export class MapRenderer {
     this.scene.add(this.mapGroup);
   }
 
+  hasRendered(): boolean {
+    return this.rendered;
+  }
+
   renderMap(tiles: TileType[][]): void {
+    this.rendered = true;
     this.clear();
 
     const rows = tiles.length;
