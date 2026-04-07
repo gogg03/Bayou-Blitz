@@ -52,3 +52,12 @@
 - All steps in this phase marked complete ✓  
 - architecture.md updated for all new files ✓  
 - All commits to Git ✓
+
+---
+
+## Step 6 — Orthographic Scene Setup
+**Status:** Complete  
+**Date:** 2026-04-06  
+**Summary:** Created SceneManager.ts with orthographic top-down camera, ambient + directional lighting, and flat green swamp floor plane. Refactored main.ts to use SceneManager.  
+**Test result:** Passed — Flat green rectangle on black background, no perspective distortion, zero console errors, build clean.  
+**Git commit:** Step 6 — Orthographic scene setup

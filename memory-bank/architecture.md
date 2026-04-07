@@ -253,9 +253,15 @@ The server is the single source of truth. The client never modifies world state 
 
 ### `src/main.ts`
 **Location:** src/main.ts  
-**Responsibility:** Entry point. Initializes Three.js WebGLRenderer, orthographic camera, and scene. Handles window resize. Runs the render loop.  
+**Responsibility:** Entry point. Creates SceneManager, runs the render loop.  
+**Dependencies:** rendering/SceneManager  
+**Last updated:** Step 6
+
+### `src/rendering/SceneManager.ts`
+**Location:** src/rendering/SceneManager.ts  
+**Responsibility:** Owns Three.js scene, orthographic camera, renderer, lighting, swamp floor, and resize handler.  
 **Dependencies:** three  
-**Last updated:** Step 1
+**Last updated:** Step 6
 
 ### `shared/types.ts`
 **Location:** shared/types.ts  
