@@ -8,6 +8,7 @@ import { InputController } from './input/InputController';
 import { NetworkClient } from './network/NetworkClient';
 import { GameState } from './game/GameState';
 import { Interpolator } from './game/Interpolator';
+import { HUD } from './ui/HUD';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001/ws';
 
@@ -21,6 +22,7 @@ const netRenderer = new NetRenderer(sceneManager.scene);
 const inputController = new InputController();
 const gameState = new GameState();
 const interpolator = new Interpolator();
+const hud = new HUD();
 const network = new NetworkClient(WS_URL);
 
 const knownBoats = new Set<string>();
@@ -78,6 +80,7 @@ function animate(): void {
     trapRenderer.updateTraps(gameState.worldState.traps, performance.now() / 1000);
     gatorRenderer.updateGators(gameState.worldState.gators);
     netRenderer.updateNets(gameState.worldState.netProjectiles);
+    hud.updateTimer(gameState.worldState.roundTimer);
   }
 
   sceneManager.render();

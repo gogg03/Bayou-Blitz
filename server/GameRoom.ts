@@ -1,7 +1,7 @@
 import { WebSocket } from 'ws';
 import type { BoatState, TrapState, GatorState, WorldState, InputEvent, Vec2, NetProjectile } from '../shared/types';
 import { MessageType } from '../shared/types';
-import { TICK_INTERVAL_MS, TileType, TILE_SIZE } from '../shared/constants';
+import { TICK_INTERVAL_MS, TileType, TILE_SIZE, ROUND_DURATION } from '../shared/constants';
 import { generateMap } from '../shared/MapGenerator';
 import {
   updateBoatPhysics, resolveBoatCollisions,
@@ -24,6 +24,8 @@ export class GameRoom {
   private inputs: Map<string, InputEvent> = new Map();
   private intervalId: ReturnType<typeof setInterval> | null = null;
   private room: Room;
+  private roundTimer: number = ROUND_DURATION;
+  private roundActive: boolean = true;
 
   constructor(room: Room) {
     this.room = room;
@@ -101,6 +103,15 @@ export class GameRoom {
 
   private tick(): void {
     const dt = TICK_INTERVAL_MS / 1000;
+
+    if (this.roundActive) {
+      this.roundTimer -= dt;
+      if (this.roundTimer <= 0) {
+        this.roundTimer = 0;
+        this.roundActive = false;
+      }
+    }
+
     const boatArray = Array.from(this.boats.values());
 
     for (const boat of boatArray) {
@@ -146,8 +157,8 @@ export class GameRoom {
       traps: this.traps,
       gators: this.gators,
       netProjectiles: this.netProjectiles,
-      roundTimer: 0,
-      roundActive: true,
+      roundTimer: this.roundTimer,
+      roundActive: this.roundActive,
     };
 
     const message = JSON.stringify({

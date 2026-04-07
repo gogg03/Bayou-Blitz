@@ -241,3 +241,20 @@ Proceeding to Phase 5 - Step 16.
 **Summary:** Implemented net gun system. Server: tryFireNet spawns a net projectile from the boat's bow on Space press (5s cooldown). updateNetProjectiles moves nets at NET_SPEED, detects hit against other boats (within collision radius), applies 2s stun, and removes expired nets beyond NET_RANGE. Client: NetRenderer.ts renders nets as white wireframe spheres. Added NetProjectile type to shared/types.ts and netProjectiles array to WorldState.  
 **Test result:** Passed — Net fires on Space, travels forward, stuns hit boats for 2s, respects 5s cooldown. Zero type errors on both client and server.  
 **Git commit:** Step 22 — Net gun
+
+---
+
+## Phase 6 Checkpoint
+- npm run build -> zero errors ✓ (both client and server)  
+- All steps in this phase marked complete ✓  
+- architecture.md updated for all new files ✓  
+- All commits to Git ✓
+
+---
+
+## Step 23 — Round Timer
+**Status:** Complete  
+**Date:** 2026-04-07  
+**Summary:** Server GameRoom.ts now manages a 3-minute countdown (ROUND_DURATION=180), decremented each tick. roundTimer and roundActive are broadcast in WorldState. Client HUD.ts displays the live countdown with color changes at 60s (yellow) and 30s (red).  
+**Test result:** Passed — Timer counts down from 3:00, changes color, reaches 0:00. Zero type errors on both client and server.  
+**Git commit:** Step 23 — Round timer

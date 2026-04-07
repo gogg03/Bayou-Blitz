@@ -347,6 +347,12 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** three, shared/types  
 **Last updated:** Step 21
 
+### `src/ui/HUD.ts`
+**Location:** src/ui/HUD.ts  
+**Responsibility:** Renders the in-game HUD overlay. Displays round timer with color-coded urgency.  
+**Dependencies:** none (vanilla DOM)  
+**Last updated:** Step 23
+
 ### `src/rendering/NetRenderer.ts`
 **Location:** src/rendering/NetRenderer.ts  
 **Responsibility:** Renders net projectiles as white wireframe spheres. Creates/removes meshes based on active net projectiles in world state.  
