@@ -140,3 +140,12 @@
 **Summary:** Created server/index.ts with Express HTTP server and ws WebSocket server on port 3001. Logs connections and disconnections. Health check endpoint at /api/health.  
 **Test result:** Passed — Server starts on port 3001, client connects via ws://localhost:3001/ws, server logs connection and disconnection correctly.  
 **Git commit:** Step 13 — Express + WebSocket server
+
+---
+
+## Step 14 — Room Manager
+**Status:** Complete  
+**Date:** 2026-04-06  
+**Summary:** Built RoomManager.ts with player assignment, room creation/destruction, player/room ID generation, and broadcast helpers. Updated server/index.ts to use RoomManager for connection handling and JOIN message processing.  
+**Test result:** Passed — Two browser tabs both receive unique player IDs and the same room ID. Server logs show both in the same room.  
+**Git commit:** Step 14 — Room manager

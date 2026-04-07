@@ -287,6 +287,12 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** three, constants/GameConfig  
 **Last updated:** Step 7
 
+### `server/RoomManager.ts`
+**Location:** server/RoomManager.ts  
+**Responsibility:** Creates and manages game rooms. Assigns players to rooms, handles join/leave, generates player/room IDs, provides broadcast helpers.  
+**Dependencies:** ws, shared/types  
+**Last updated:** Step 14
+
 ### `src/game/LocalPhysics.ts`
 **Location:** src/game/LocalPhysics.ts  
 **Responsibility:** Temporary client-side airboat physics for visual testing. Handles momentum, drag, drift, tile collision. Will be replaced by server-authoritative physics in Step 18.  
