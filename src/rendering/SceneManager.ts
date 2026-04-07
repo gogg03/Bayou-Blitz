@@ -1,11 +1,13 @@
 import * as THREE from 'three';
 
 const ZOOM = 1;
+const CAMERA_LERP_SPEED = 0.08;
 
 export class SceneManager {
   readonly renderer: THREE.WebGLRenderer;
   readonly scene: THREE.Scene;
   readonly camera: THREE.OrthographicCamera;
+  private followTarget: { x: number; z: number } | null = null;
 
   constructor(container: HTMLElement) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -69,7 +71,20 @@ export class SceneManager {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
+  setFollowTarget(x: number, z: number): void {
+    this.followTarget = { x, z };
+  }
+
+  update(): void {
+    if (this.followTarget) {
+      const cam = this.camera.position;
+      cam.x += (this.followTarget.x - cam.x) * CAMERA_LERP_SPEED;
+      cam.z += (this.followTarget.z - cam.z) * CAMERA_LERP_SPEED;
+    }
+  }
+
   render(): void {
+    this.update();
     this.renderer.render(this.scene, this.camera);
   }
 }

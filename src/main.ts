@@ -17,11 +17,18 @@ console.log('Map 1 generated');
 
 let mapCount = 1;
 
-(window as unknown as Record<string, unknown>).nextMap = () => {
+const devWindow = window as unknown as Record<string, unknown>;
+
+devWindow.nextMap = () => {
   mapCount++;
   currentMap = generateMap();
   mapRenderer.renderMap(currentMap);
   console.log(`Map ${mapCount} generated`);
+};
+
+devWindow.moveCamera = (x: number, z: number) => {
+  sceneManager.setFollowTarget(x, z);
+  console.log(`Camera following target (${x}, ${z})`);
 };
 
 function animate(): void {

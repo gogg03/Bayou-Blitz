@@ -79,3 +79,12 @@
 **Summary:** Built MapGenerator.ts with procedural swamp generation: water highways (4), tight corridors (2), water pockets, dock platforms, reed wall clusters, gator zones, and border reeds. Each map has randomized channel wobble for variety. Window.nextMap() exposed for testing.  
 **Test result:** Passed — Multiple maps generate and render correctly with distinct layouts. All include open water routes and tight corridors.  
 **Git commit:** Step 8 — Procedural map generator
+
+---
+
+## Step 9 — Camera Follow
+**Status:** Complete  
+**Date:** 2026-04-06  
+**Summary:** Added camera follow with smooth LERP interpolation to SceneManager. Window.moveCamera(x,z) exposed for console testing. Camera smoothly tracks target with no jitter or snapping.  
+**Test result:** Passed — moveCamera(x,z) via console moves camera smoothly to target. No jitter, no snapping. Full build passes zero errors.  
+**Git commit:** Step 9 — Camera follow
