@@ -257,6 +257,18 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** three  
 **Last updated:** Step 1
 
+### `shared/types.ts`
+**Location:** shared/types.ts  
+**Responsibility:** Shared TypeScript interfaces and enums used by both client and server: Vec2, BoatState, TrapState, GatorState, WorldState, InputEvent, MessageType, WsMessage.  
+**Dependencies:** None  
+**Last updated:** Step 3
+
+### `server/index.ts`
+**Location:** server/index.ts  
+**Responsibility:** Server entry point (stub). Will host Express + WebSocket server on port 3001.  
+**Dependencies:** shared/types.ts  
+**Last updated:** Step 3
+
 ### `src/vite-env.d.ts`
 **Location:** src/vite-env.d.ts  
 **Responsibility:** Vite client type declarations.  

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import type { WorldState } from '@shared/types';
 
 const app = document.getElementById('app')!;
 
