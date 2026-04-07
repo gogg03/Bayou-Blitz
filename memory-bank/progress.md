@@ -26,3 +26,12 @@
 **Summary:** Created /shared/types.ts with BoatState, TrapState, GatorState, WorldState, InputEvent, WsMessage, MessageType, and Vec2. Both client and server import cleanly.  
 **Test result:** Passed — src/main.ts and server/index.ts both import from shared/types.ts without errors.  
 **Git commit:** Step 3 — Shared types
+
+---
+
+## Step 4 — Environment Variables
+**Status:** Complete  
+**Date:** 2026-04-06  
+**Summary:** Created .env with VITE_WS_URL and VITE_API_BASE_URL placeholders. Added dev-only console logs guarded by import.meta.env.DEV. Verified values do not appear in production build output.  
+**Test result:** Passed — Console logs both env var values in dev mode. Neither value appears in the compiled dist output.  
+**Git commit:** Step 4 — Environment variables
