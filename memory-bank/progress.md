@@ -214,3 +214,12 @@ Proceeding to Phase 5 - Step 16.
 - All steps in this phase marked complete ✓  
 - architecture.md updated for all new files ✓  
 - All commits to Git ✓
+
+---
+
+## Step 20 — Crawfish Traps
+**Status:** Complete  
+**Date:** 2026-04-07  
+**Summary:** Built TrapRenderer.ts rendering traps as orange wireframe cylinders with glowing sphere halos and sine-wave bobbing. Server already handles proximity collection and 10s respawn. Client renders from world state traps array.  
+**Test result:** Passed — Traps render on map, disappear on collection, score increments, reappear after 10s at new location. Zero type errors.  
+**Git commit:** Step 20 — Crawfish traps

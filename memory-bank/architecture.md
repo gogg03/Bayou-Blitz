@@ -335,6 +335,12 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** ws, shared/types  
 **Last updated:** Step 14
 
+### `src/rendering/TrapRenderer.ts`
+**Location:** src/rendering/TrapRenderer.ts  
+**Responsibility:** Renders crawfish trap markers as wireframe cylinders with glowing halos. Handles create/remove based on active state, bobbing animation.  
+**Dependencies:** three, shared/types  
+**Last updated:** Step 20
+
 ### `src/game/Interpolator.ts`
 **Location:** src/game/Interpolator.ts  
 **Responsibility:** Smooths boat positions between server tick snapshots using linear interpolation. Eliminates jitter at 20Hz server rate.  

@@ -1,6 +1,7 @@
 import { SceneManager } from './rendering/SceneManager';
 import { MapRenderer } from './rendering/MapRenderer';
 import { BoatRenderer } from './rendering/BoatRenderer';
+import { TrapRenderer } from './rendering/TrapRenderer';
 import { InputController } from './input/InputController';
 import { NetworkClient } from './network/NetworkClient';
 import { GameState } from './game/GameState';
@@ -12,6 +13,7 @@ const app = document.getElementById('app')!;
 const sceneManager = new SceneManager(app);
 const mapRenderer = new MapRenderer(sceneManager.scene);
 const boatRenderer = new BoatRenderer(sceneManager.scene);
+const trapRenderer = new TrapRenderer(sceneManager.scene);
 const inputController = new InputController();
 const gameState = new GameState();
 const interpolator = new Interpolator();
@@ -66,6 +68,10 @@ function animate(): void {
         sceneManager.setFollowTarget(interp.x, interp.y);
       }
     }
+  }
+
+  if (gameState.worldState) {
+    trapRenderer.updateTraps(gameState.worldState.traps, performance.now() / 1000);
   }
 
   sceneManager.render();
