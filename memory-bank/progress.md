@@ -197,3 +197,20 @@ Proceeding to Phase 5 - Step 16.
 **Summary:** Deleted LocalPhysics.ts. Built NetworkClient.ts for WebSocket connection to server. Built GameState.ts as client-side world state mirror. Main.ts now renders boat positions from server state only. Input sent to server each frame.  
 **Test result:** Passed — Client connects to server, receives world state, renders boats at server-authoritative positions. Zero type errors.  
 **Git commit:** Step 18 — Remove client-side physics
+
+---
+
+## Step 19 — Interpolation
+**Status:** Complete  
+**Date:** 2026-04-06  
+**Summary:** Built Interpolator.ts that smooths boat positions between server tick snapshots. Stores previous/current snapshots, linearly interpolates based on elapsed time. Angle lerp handles wrapping. Boats render fluidly at 60fps despite 20Hz server ticks.  
+**Test result:** Passed — Boats move fluidly without jitter between ticks. Full build (client + server) passes zero errors at Step 19 checkpoint.  
+**Git commit:** Step 19 — Interpolation
+
+---
+
+## Phase 5 Checkpoint
+- npm run build -> zero errors ✓ (both client and server)  
+- All steps in this phase marked complete ✓  
+- architecture.md updated for all new files ✓  
+- All commits to Git ✓

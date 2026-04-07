@@ -4,6 +4,7 @@ import { BoatRenderer } from './rendering/BoatRenderer';
 import { InputController } from './input/InputController';
 import { NetworkClient } from './network/NetworkClient';
 import { GameState } from './game/GameState';
+import { Interpolator } from './game/Interpolator';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001/ws';
 
@@ -13,6 +14,7 @@ const mapRenderer = new MapRenderer(sceneManager.scene);
 const boatRenderer = new BoatRenderer(sceneManager.scene);
 const inputController = new InputController();
 const gameState = new GameState();
+const interpolator = new Interpolator();
 const network = new NetworkClient(WS_URL);
 
 const knownBoats = new Set<string>();
@@ -24,6 +26,7 @@ network.onAssigned((playerId, roomId) => {
 
 network.onWorldState((worldState, tiles) => {
   gameState.updateFromServer(worldState, tiles);
+  interpolator.update(worldState.boats);
 
   if (gameState.tiles && !mapRenderer.hasRendered()) {
     mapRenderer.renderMap(gameState.tiles);
@@ -37,7 +40,6 @@ network.onWorldState((worldState, tiles) => {
       boatRenderer.createBoat(boat.id, isLocal ? 0xcc4422 : 0x2266aa);
       knownBoats.add(boat.id);
     }
-    boatRenderer.updateBoat(boat.id, boat.position.x, boat.position.y, boat.rotation);
   }
 
   for (const id of knownBoats) {
@@ -45,11 +47,6 @@ network.onWorldState((worldState, tiles) => {
       boatRenderer.removeBoat(id);
       knownBoats.delete(id);
     }
-  }
-
-  const localBoat = worldState.boats.find(b => b.id === gameState.localPlayerId);
-  if (localBoat) {
-    sceneManager.setFollowTarget(localBoat.position.x, localBoat.position.y);
   }
 });
 
@@ -59,6 +56,16 @@ function animate(): void {
   if (gameState.localPlayerId) {
     const input = inputController.getInput(gameState.localPlayerId);
     network.sendInput(input);
+  }
+
+  for (const id of knownBoats) {
+    const interp = interpolator.getInterpolated(id);
+    if (interp) {
+      boatRenderer.updateBoat(id, interp.x, interp.y, interp.rotation);
+      if (id === gameState.localPlayerId) {
+        sceneManager.setFollowTarget(interp.x, interp.y);
+      }
+    }
   }
 
   sceneManager.render();

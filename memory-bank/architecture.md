@@ -335,6 +335,12 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** ws, shared/types  
 **Last updated:** Step 14
 
+### `src/game/Interpolator.ts`
+**Location:** src/game/Interpolator.ts  
+**Responsibility:** Smooths boat positions between server tick snapshots using linear interpolation. Eliminates jitter at 20Hz server rate.  
+**Dependencies:** shared/types, shared/constants  
+**Last updated:** Step 19
+
 ### `src/network/NetworkClient.ts`
 **Location:** src/network/NetworkClient.ts  
 **Responsibility:** WebSocket client. Connects to server, sends JOIN/INPUT messages, receives ASSIGN_ID/STATE messages. Callbacks for world state and player assignment.  
