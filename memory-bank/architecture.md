@@ -271,9 +271,9 @@ The server is the single source of truth. The client never modifies world state 
 
 ### `server/index.ts`
 **Location:** server/index.ts  
-**Responsibility:** Server entry point (stub). Will host Express + WebSocket server on port 3001.  
-**Dependencies:** shared/types.ts  
-**Last updated:** Step 3
+**Responsibility:** Server entry point. Creates Express HTTP server with health check, attaches ws WebSocket server at /ws path, logs connections/disconnections.  
+**Dependencies:** express, ws, shared/types  
+**Last updated:** Step 13
 
 ### `src/game/MapGenerator.ts`
 **Location:** src/game/MapGenerator.ts  

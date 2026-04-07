@@ -123,3 +123,20 @@
 **Summary:** Implemented temporary client-side momentum-based airboat physics. Boat drifts on turns, accelerates/decelerates with drag, collides with solid tiles. Created BoatConfig.ts for physics constants and LocalPhysics.ts for movement logic.  
 **Test result:** Passed — Boat moves with airboat feel (slides on turns, doesn't stop instantly). Boat cannot drive through reed walls or land tiles. Zero type errors.  
 **Git commit:** Step 12 — Local physics preview
+
+---
+
+## Phase 3 Checkpoint
+- npm run build -> zero errors ✓  
+- All steps in this phase marked complete ✓  
+- architecture.md updated for all new files ✓  
+- All commits to Git ✓
+
+---
+
+## Step 13 — Express + WebSocket Server
+**Status:** Complete  
+**Date:** 2026-04-06  
+**Summary:** Created server/index.ts with Express HTTP server and ws WebSocket server on port 3001. Logs connections and disconnections. Health check endpoint at /api/health.  
+**Test result:** Passed — Server starts on port 3001, client connects via ws://localhost:3001/ws, server logs connection and disconnection correctly.  
+**Git commit:** Step 13 — Express + WebSocket server

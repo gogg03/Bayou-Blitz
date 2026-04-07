@@ -13,10 +13,12 @@
   "author": "GOGG03",
   "license": "ISC",
   "dependencies": {
+    "express": "^5.2.1",
     "three": "^0.183.2",
     "ws": "^8.20.0"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/node": "^25.5.2",
     "@types/three": "^0.183.1",
     "@types/ws": "^8.18.1",
