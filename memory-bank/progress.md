@@ -308,3 +308,20 @@ Proceeding to Phase 5 - Step 16.
 **Summary:** Built RoundSummary.ts showing ranked player list with medal emojis, global top 10 leaderboard fetched from /api/scores, and play-again countdown. Submits all non-zero scores to the backend leaderboard. Hides on ROUND_START. Integrated into main.ts with ROUND_END callback.  
 **Test result:** Passed — Zero type errors.  
 **Git commit:** Step 28 — Round summary screen
+
+---
+
+## Phase 7 Checkpoint
+- npm run build -> zero errors ✓ (both client and server)  
+- All steps in this phase marked complete ✓  
+- architecture.md updated for all new files ✓  
+- All commits to Git ✓
+
+---
+
+## Step 29 — Audio
+**Status:** Complete  
+**Date:** 2026-04-07  
+**Summary:** Built AudioManager.ts using Web Audio API with synthesized sounds. Ambient hum, sawtooth engine sound with speed-based pitch, white noise splash SFX on knockback, low growl for gator contact, ping for net fire. Muted by default with HUD toggle button. AudioContext initialized on first user interaction.  
+**Test result:** Passed — Zero type errors.  
+**Git commit:** Step 29 — Audio

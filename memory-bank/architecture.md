@@ -347,6 +347,12 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** three, shared/types  
 **Last updated:** Step 21
 
+### `src/audio/AudioManager.ts`
+**Location:** src/audio/AudioManager.ts  
+**Responsibility:** Web Audio API synthesized sound effects. Engine hum, splash, gator growl, net fire. Mute toggle.  
+**Dependencies:** none (native Web Audio API)  
+**Last updated:** Step 29
+
 ### `src/ui/RoundSummary.ts`
 **Location:** src/ui/RoundSummary.ts  
 **Responsibility:** Post-round summary overlay showing ranked scores, global leaderboard from API, and next-round countdown.  

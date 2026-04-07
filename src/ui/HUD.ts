@@ -8,6 +8,7 @@ export class HUD {
   private leaderboardEl: HTMLDivElement;
   private cooldownEl: HTMLDivElement;
   private playerCountEl: HTMLDivElement;
+  readonly muteBtn: HTMLButtonElement;
 
   constructor() {
     this.container = document.createElement('div');
@@ -38,6 +39,15 @@ export class HUD {
     document.body.appendChild(this.cooldownEl);
     document.body.appendChild(this.playerCountEl);
     document.body.appendChild(this.leaderboardEl);
+
+    this.muteBtn = document.createElement('button');
+    this.muteBtn.textContent = 'Unmute';
+    Object.assign(this.muteBtn.style, {
+      position: 'fixed', bottom: '20px', right: '20px', zIndex: '10',
+      padding: '8px 16px', fontSize: '14px', border: '1px solid #666',
+      borderRadius: '6px', background: '#222', color: '#ccc', cursor: 'pointer',
+    });
+    document.body.appendChild(this.muteBtn);
   }
 
   private makeEl(styles: Record<string, string>): HTMLDivElement {

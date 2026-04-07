@@ -11,6 +11,7 @@ import { Interpolator } from './game/Interpolator';
 import { HUD } from './ui/HUD';
 import { LobbyScreen } from './ui/LobbyScreen';
 import { RoundSummary } from './ui/RoundSummary';
+import { AudioManager } from './audio/AudioManager';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001/ws';
 
@@ -27,9 +28,17 @@ const interpolator = new Interpolator();
 const hud = new HUD();
 const lobby = new LobbyScreen();
 const roundSummary = new RoundSummary();
+const audio = new AudioManager();
 const network = new NetworkClient(WS_URL);
 
 const knownBoats = new Set<string>();
+let prevStunned = false;
+
+hud.muteBtn.addEventListener('click', () => {
+  audio.init();
+  const muted = audio.toggleMute();
+  hud.muteBtn.textContent = muted ? 'Unmute' : 'Mute';
+});
 
 lobby.onJoinGame((name) => {
   network.connect(name);
@@ -104,6 +113,10 @@ function animate(): void {
     if (localBoat) {
       hud.updateScore(localBoat.score);
       hud.updateCooldown(localBoat.netCooldown);
+      const speed = Math.sqrt(localBoat.velocity.x ** 2 + localBoat.velocity.y ** 2);
+      audio.updateEngine(speed);
+      if (localBoat.isStunned && !prevStunned) audio.playSplash();
+      prevStunned = localBoat.isStunned;
     }
   }
 
