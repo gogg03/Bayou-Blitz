@@ -1,38 +1,54 @@
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-const ZOOM = 1;
 const CAMERA_LERP_SPEED = 0.08;
+const CAMERA_DISTANCE = 350;
+const CAMERA_ANGLE = Math.PI / 4;
+const MIN_POLAR = Math.PI / 8;
+const MAX_POLAR = Math.PI / 2.5;
 
 export class SceneManager {
   readonly renderer: THREE.WebGLRenderer;
   readonly scene: THREE.Scene;
-  readonly camera: THREE.OrthographicCamera;
+  readonly camera: THREE.PerspectiveCamera;
+  private controls: OrbitControls;
   private followTarget: { x: number; z: number } | null = null;
+  private cameraOffset: THREE.Vector3;
 
   constructor(container: HTMLElement) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setClearColor(0x000000);
+    this.renderer.setClearColor(0x0a1a0d);
     container.appendChild(this.renderer.domElement);
 
     this.scene = new THREE.Scene();
+    this.scene.fog = new THREE.Fog(0x0a1a0d, 800, 1600);
 
     const aspect = window.innerWidth / window.innerHeight;
-    const viewHeight = 800 / ZOOM;
-    const viewWidth = viewHeight * aspect;
+    this.camera = new THREE.PerspectiveCamera(50, aspect, 1, 3000);
 
-    this.camera = new THREE.OrthographicCamera(
-      -viewWidth / 2,
-      viewWidth / 2,
-      viewHeight / 2,
-      -viewHeight / 2,
-      0.1,
-      1000
+    this.cameraOffset = new THREE.Vector3(
+      0,
+      Math.sin(CAMERA_ANGLE) * CAMERA_DISTANCE,
+      Math.cos(CAMERA_ANGLE) * CAMERA_DISTANCE
     );
-    this.camera.position.set(0, 100, 0);
-    this.camera.up.set(0, 0, -1);
+    this.camera.position.copy(this.cameraOffset);
     this.camera.lookAt(0, 0, 0);
+
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.mouseButtons = {
+      LEFT: -1 as THREE.MOUSE,
+      MIDDLE: THREE.MOUSE.ROTATE,
+      RIGHT: THREE.MOUSE.PAN,
+    };
+    this.controls.enableZoom = true;
+    this.controls.minDistance = 100;
+    this.controls.maxDistance = 800;
+    this.controls.minPolarAngle = MIN_POLAR;
+    this.controls.maxPolarAngle = MAX_POLAR;
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.1;
 
     this.setupLighting();
     this.createSwampFloor();
@@ -50,7 +66,7 @@ export class SceneManager {
   }
 
   private createSwampFloor(): void {
-    const geometry = new THREE.PlaneGeometry(2000, 2000);
+    const geometry = new THREE.PlaneGeometry(3000, 3000);
     const material = new THREE.MeshStandardMaterial({ color: 0x2d5a27 });
     const floor = new THREE.Mesh(geometry, material);
     floor.rotation.x = -Math.PI / 2;
@@ -59,16 +75,8 @@ export class SceneManager {
   }
 
   private onResize(): void {
-    const aspect = window.innerWidth / window.innerHeight;
-    const viewHeight = 800 / ZOOM;
-    const viewWidth = viewHeight * aspect;
-
-    this.camera.left = -viewWidth / 2;
-    this.camera.right = viewWidth / 2;
-    this.camera.top = viewHeight / 2;
-    this.camera.bottom = -viewHeight / 2;
+    this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
-
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
@@ -78,10 +86,11 @@ export class SceneManager {
 
   update(): void {
     if (this.followTarget) {
-      const cam = this.camera.position;
-      cam.x += (this.followTarget.x - cam.x) * CAMERA_LERP_SPEED;
-      cam.z += (this.followTarget.z - cam.z) * CAMERA_LERP_SPEED;
+      const target = this.controls.target;
+      target.x += (this.followTarget.x - target.x) * CAMERA_LERP_SPEED;
+      target.z += (this.followTarget.z - target.z) * CAMERA_LERP_SPEED;
     }
+    this.controls.update();
   }
 
   render(): void {
