@@ -29,10 +29,19 @@ export interface GatorState {
   patrolPath: Vec2[];
 }
 
+export interface NetProjectile {
+  id: string;
+  ownerId: string;
+  position: Vec2;
+  velocity: Vec2;
+  distanceTraveled: number;
+}
+
 export interface WorldState {
   boats: BoatState[];
   traps: TrapState[];
   gators: GatorState[];
+  netProjectiles: NetProjectile[];
   roundTimer: number;
   roundActive: boolean;
 }

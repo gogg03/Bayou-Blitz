@@ -1,5 +1,8 @@
-import type { BoatState, Vec2 } from '../shared/types';
-import { TILE_SIZE, TileType, BOAT_MAX_SPEED, BOAT_DRIFT_FACTOR } from '../shared/constants';
+import type { BoatState, Vec2, NetProjectile } from '../shared/types';
+import {
+  TILE_SIZE, TileType, BOAT_MAX_SPEED, BOAT_DRIFT_FACTOR,
+  NET_RANGE, NET_STUN_DURATION, BOAT_COLLISION_RADIUS,
+} from '../shared/constants';
 
 export function forwardDir(rotation: number): Vec2 {
   return { x: -Math.sin(rotation), y: -Math.cos(rotation) };
@@ -54,4 +57,37 @@ export function randomWaterPosition(tiles: TileType[][]): Vec2 {
     }
   }
   return { x: 0, y: 0 };
+}
+
+export function updateNetProjectiles(
+  nets: NetProjectile[],
+  boats: BoatState[],
+  dt: number
+): void {
+  for (let i = nets.length - 1; i >= 0; i--) {
+    const net = nets[i];
+    const step = Math.sqrt(net.velocity.x ** 2 + net.velocity.y ** 2) * dt;
+    net.position.x += net.velocity.x * dt;
+    net.position.y += net.velocity.y * dt;
+    net.distanceTraveled += step;
+
+    if (net.distanceTraveled >= NET_RANGE) {
+      nets.splice(i, 1);
+      continue;
+    }
+
+    let hit = false;
+    for (const boat of boats) {
+      if (boat.id === net.ownerId) continue;
+      const dx = boat.position.x - net.position.x;
+      const dy = boat.position.y - net.position.y;
+      if (dx * dx + dy * dy < BOAT_COLLISION_RADIUS * BOAT_COLLISION_RADIUS) {
+        boat.isStunned = true;
+        boat.stunTimer = NET_STUN_DURATION;
+        hit = true;
+        break;
+      }
+    }
+    if (hit) nets.splice(i, 1);
+  }
 }

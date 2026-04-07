@@ -232,3 +232,12 @@ Proceeding to Phase 5 - Step 16.
 **Summary:** Built GatorRenderer.ts rendering gators as dark-green box bodies with cone tails and red glowing eyes. Gators face their patrol target via atan2. Server already handles patrol movement, contact detection, knockback, and 1s stun.  
 **Test result:** Passed — Gators visible on map, patrol their routes, boat contact triggers knockback + stun. Zero type errors.  
 **Git commit:** Step 21 — Gator entities
+
+---
+
+## Step 22 — Net Gun
+**Status:** Complete  
+**Date:** 2026-04-07  
+**Summary:** Implemented net gun system. Server: tryFireNet spawns a net projectile from the boat's bow on Space press (5s cooldown). updateNetProjectiles moves nets at NET_SPEED, detects hit against other boats (within collision radius), applies 2s stun, and removes expired nets beyond NET_RANGE. Client: NetRenderer.ts renders nets as white wireframe spheres. Added NetProjectile type to shared/types.ts and netProjectiles array to WorldState.  
+**Test result:** Passed — Net fires on Space, travels forward, stuns hit boats for 2s, respects 5s cooldown. Zero type errors on both client and server.  
+**Git commit:** Step 22 — Net gun

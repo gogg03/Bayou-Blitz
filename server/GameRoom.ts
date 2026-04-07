@@ -1,11 +1,12 @@
 import { WebSocket } from 'ws';
-import type { BoatState, TrapState, GatorState, WorldState, InputEvent, Vec2 } from '../shared/types';
+import type { BoatState, TrapState, GatorState, WorldState, InputEvent, Vec2, NetProjectile } from '../shared/types';
 import { MessageType } from '../shared/types';
 import { TICK_INTERVAL_MS, TileType, TILE_SIZE } from '../shared/constants';
 import { generateMap } from '../shared/MapGenerator';
 import {
   updateBoatPhysics, resolveBoatCollisions,
   checkTrapCollection, updateTrapTimers, checkGatorContact,
+  tryFireNet, updateNetProjectiles,
 } from './Physics';
 import { randomWaterPosition } from './PhysicsHelpers';
 import type { Room } from './RoomManager';
@@ -18,6 +19,8 @@ export class GameRoom {
   private boats: Map<string, BoatState> = new Map();
   private traps: TrapState[] = [];
   private gators: GatorState[] = [];
+  private netProjectiles: NetProjectile[] = [];
+  private netIdCounter = { value: 0 };
   private inputs: Map<string, InputEvent> = new Map();
   private intervalId: ReturnType<typeof setInterval> | null = null;
   private room: Room;
@@ -105,9 +108,13 @@ export class GameRoom {
         playerId: boat.id, throttle: 0, steer: 0, fireNet: false,
       };
       updateBoatPhysics(boat, input, dt, this.tiles);
+      if (input.fireNet) {
+        tryFireNet(boat, this.netProjectiles, this.netIdCounter);
+      }
     }
 
     resolveBoatCollisions(boatArray);
+    updateNetProjectiles(this.netProjectiles, boatArray, dt);
     checkTrapCollection(boatArray, this.traps);
     updateTrapTimers(this.traps, dt, this.tiles);
     this.updateGatorPatrols(dt);
@@ -138,6 +145,7 @@ export class GameRoom {
       boats: Array.from(this.boats.values()),
       traps: this.traps,
       gators: this.gators,
+      netProjectiles: this.netProjectiles,
       roundTimer: 0,
       roundActive: true,
     };

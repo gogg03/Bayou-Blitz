@@ -347,6 +347,12 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** three, shared/types  
 **Last updated:** Step 21
 
+### `src/rendering/NetRenderer.ts`
+**Location:** src/rendering/NetRenderer.ts  
+**Responsibility:** Renders net projectiles as white wireframe spheres. Creates/removes meshes based on active net projectiles in world state.  
+**Dependencies:** three, shared/types  
+**Last updated:** Step 22
+
 ### `src/game/Interpolator.ts`
 **Location:** src/game/Interpolator.ts  
 **Responsibility:** Smooths boat positions between server tick snapshots using linear interpolation. Eliminates jitter at 20Hz server rate.  

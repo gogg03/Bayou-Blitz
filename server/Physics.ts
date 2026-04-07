@@ -1,11 +1,11 @@
-import type { BoatState, TrapState, GatorState, InputEvent } from '../shared/types';
+import type { BoatState, TrapState, GatorState, InputEvent, NetProjectile } from '../shared/types';
 import {
   TileType,
   BOAT_ACCELERATION, BOAT_REVERSE_ACCELERATION, BOAT_DRAG, BOAT_TURN_SPEED,
   BOAT_COLLISION_RADIUS, BOAT_COLLISION_BOUNCE,
   TRAP_COLLECT_RADIUS, TRAP_RESPAWN_DELAY,
   GATOR_CONTACT_RADIUS, GATOR_KNOCKBACK_FORCE, GATOR_STUN_DURATION,
-  NET_STUN_DURATION,
+  NET_STUN_DURATION, NET_SPEED, NET_COOLDOWN,
 } from '../shared/constants';
 import { forwardDir, applyDrift, clampSpeed, isSolidTile, randomWaterPosition } from './PhysicsHelpers';
 
@@ -152,4 +152,21 @@ export function applyNetStun(target: BoatState): void {
   target.stunTimer = NET_STUN_DURATION;
 }
 
-export { randomWaterPosition } from './PhysicsHelpers';
+export function tryFireNet(
+  boat: BoatState,
+  nets: NetProjectile[],
+  netIdCounter: { value: number }
+): void {
+  if (boat.netCooldown > 0 || boat.isStunned) return;
+  boat.netCooldown = NET_COOLDOWN;
+  const fwd = forwardDir(boat.rotation);
+  nets.push({
+    id: `net-${netIdCounter.value++}`,
+    ownerId: boat.id,
+    position: { x: boat.position.x + fwd.x * 10, y: boat.position.y + fwd.y * 10 },
+    velocity: { x: fwd.x * NET_SPEED, y: fwd.y * NET_SPEED },
+    distanceTraveled: 0,
+  });
+}
+
+export { randomWaterPosition, updateNetProjectiles } from './PhysicsHelpers';
