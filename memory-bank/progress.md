@@ -35,3 +35,20 @@
 **Summary:** Created .env with VITE_WS_URL and VITE_API_BASE_URL placeholders. Added dev-only console logs guarded by import.meta.env.DEV. Verified values do not appear in production build output.  
 **Test result:** Passed — Console logs both env var values in dev mode. Neither value appears in the compiled dist output.  
 **Git commit:** Step 4 — Environment variables
+
+---
+
+## Step 5 — Memory Bank
+**Status:** Complete  
+**Date:** 2026-04-06  
+**Summary:** Memory bank folder already exists with all planning documents. Verified /memory-bank/ does not appear in /dist after build.  
+**Test result:** Passed — /memory-bank does not appear in /dist after npm run build.  
+**Git commit:** Step 5 — Memory bank build exclusion
+
+---
+
+## Phase 1 Checkpoint
+- npm run build -> zero errors ✓  
+- All steps in this phase marked complete ✓  
+- architecture.md updated for all new files ✓  
+- All commits to Git ✓
