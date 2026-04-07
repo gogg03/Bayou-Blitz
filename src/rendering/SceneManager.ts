@@ -96,7 +96,7 @@ export class SceneManager {
     }
 
     if (!this.userOrbiting && performance.now() - this.orbitReleaseTime > RELEASE_RETURN_DELAY) {
-      const desiredAzimuth = this.followRotation + Math.PI;
+      const desiredAzimuth = this.followRotation;
       const current = this.controls.getAzimuthalAngle();
       let diff = desiredAzimuth - current;
       while (diff > Math.PI) diff -= Math.PI * 2;
