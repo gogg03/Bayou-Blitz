@@ -343,3 +343,11 @@ Proceeding to Phase 5 - Step 16.
 **Summary:** Added billboard name labels above each boat using Three.js Sprite with CanvasTexture. Names are rendered with white fill and black outline stroke for readability. Sprites always face the camera. BoatRenderer.createBoat now accepts optional name parameter.  
 **Test result:** Passed — Zero type errors.  
 **Git commit:** Step 31 — Boat name labels
+
+---
+
+## Phase 9 Checkpoint
+- npm run build -> zero errors ✓ (both client and server)  
+- All steps in this phase marked complete ✓  
+- architecture.md updated for all new files ✓  
+- All commits to Git ✓

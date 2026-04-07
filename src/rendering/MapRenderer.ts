@@ -121,5 +121,6 @@ export class MapRenderer {
         (child.material as THREE.Material).dispose();
       }
     }
+    this.rendered = false;
   }
 }

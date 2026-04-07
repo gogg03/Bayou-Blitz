@@ -9,7 +9,7 @@ export class GameState {
 
   updateFromServer(worldState: WorldState, tiles: TileType[][]): void {
     this.worldState = worldState;
-    if (!this.tiles) {
+    if (tiles) {
       this.tiles = tiles;
     }
   }
