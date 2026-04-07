@@ -347,6 +347,12 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** three, shared/types  
 **Last updated:** Step 21
 
+### `src/ui/LobbyScreen.ts`
+**Location:** src/ui/LobbyScreen.ts  
+**Responsibility:** Pre-game lobby overlay with name entry, join button, and status. Auto-hides on connection.  
+**Dependencies:** none (vanilla DOM)  
+**Last updated:** Step 26
+
 ### `src/ui/HUD.ts`
 **Location:** src/ui/HUD.ts  
 **Responsibility:** Renders the in-game HUD overlay. Displays round timer with color-coded urgency.  

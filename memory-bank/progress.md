@@ -276,3 +276,17 @@ Proceeding to Phase 5 - Step 16.
 **Summary:** When round timer reaches zero, server sets roundActive=false, broadcasts ROUND_END with sorted scores, starts a 10s results countdown. After results timeout, calls startRound() to reset and begin a new round. Physics stops processing during results phase. Extracted gator patrol logic to PhysicsHelpers to keep GameRoom under 200 lines.  
 **Test result:** Passed — Zero type errors on both client and server.  
 **Git commit:** Step 25 — Round end
+
+---
+
+## Step 25 Build Checkpoint
+- npm run build -> zero errors ✓ (both client and server)
+
+---
+
+## Step 26 — Lobby Screen
+**Status:** Complete  
+**Date:** 2026-04-07  
+**Summary:** Built LobbyScreen.ts with styled name entry input, join button, and status text. Game no longer auto-connects — waits for player to enter name and click Join. Lobby hides on ASSIGN_ID and on ROUND_START. Integrated into main.ts.  
+**Test result:** Passed — Zero type errors.  
+**Git commit:** Step 26 — Lobby screen

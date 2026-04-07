@@ -9,6 +9,7 @@ import { NetworkClient } from './network/NetworkClient';
 import { GameState } from './game/GameState';
 import { Interpolator } from './game/Interpolator';
 import { HUD } from './ui/HUD';
+import { LobbyScreen } from './ui/LobbyScreen';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001/ws';
 
@@ -23,13 +24,24 @@ const inputController = new InputController();
 const gameState = new GameState();
 const interpolator = new Interpolator();
 const hud = new HUD();
+const lobby = new LobbyScreen();
 const network = new NetworkClient(WS_URL);
 
 const knownBoats = new Set<string>();
 
+lobby.onJoinGame((name) => {
+  network.connect(name);
+});
+
 network.onAssigned((playerId, roomId) => {
   gameState.setPlayer(playerId, roomId);
-  console.log(`Assigned: player=${playerId}, room=${roomId}`);
+  lobby.updateStatus(`Joined room ${roomId}`);
+  lobby.hide();
+});
+
+network.onRoundStarted(() => {
+  lobby.hide();
+  mapRenderer.clear();
 });
 
 network.onWorldState((worldState, tiles) => {
@@ -57,8 +69,6 @@ network.onWorldState((worldState, tiles) => {
     }
   }
 });
-
-network.connect('Player');
 
 function animate(): void {
   if (gameState.localPlayerId) {
