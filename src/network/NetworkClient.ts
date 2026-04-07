@@ -4,11 +4,14 @@ import type { TileType } from '../../shared/constants';
 
 export type StateCallback = (worldState: WorldState, tiles: TileType[][]) => void;
 export type AssignCallback = (playerId: string, roomId: string) => void;
+export type RoundCallback = (worldState: WorldState, tiles: TileType[][]) => void;
 
 export class NetworkClient {
   private ws: WebSocket | null = null;
   private onState: StateCallback | null = null;
   private onAssign: AssignCallback | null = null;
+  private onRoundStart: RoundCallback | null = null;
+  private onRoundEndCb: ((scores: { id: string; name: string; score: number }[]) => void) | null = null;
   private url: string;
 
   constructor(url: string) {
@@ -53,6 +56,17 @@ export class NetworkClient {
         this.onState?.(payload.worldState, payload.tiles);
         break;
       }
+      case MessageType.ROUND_START: {
+        const payload = msg.payload as { worldState: WorldState; tiles: TileType[][] };
+        this.onState?.(payload.worldState, payload.tiles);
+        this.onRoundStart?.(payload.worldState, payload.tiles);
+        break;
+      }
+      case MessageType.ROUND_END: {
+        const payload = msg.payload as { scores: { id: string; name: string; score: number }[] };
+        this.onRoundEndCb?.(payload.scores);
+        break;
+      }
     }
   }
 
@@ -66,6 +80,14 @@ export class NetworkClient {
 
   onAssigned(callback: AssignCallback): void {
     this.onAssign = callback;
+  }
+
+  onRoundStarted(callback: RoundCallback): void {
+    this.onRoundStart = callback;
+  }
+
+  onRoundEnded(callback: (scores: { id: string; name: string; score: number }[]) => void): void {
+    this.onRoundEndCb = callback;
   }
 
   private send(msg: WsMessage): void {

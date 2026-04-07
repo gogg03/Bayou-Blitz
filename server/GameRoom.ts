@@ -81,6 +81,33 @@ export class GameRoom {
     this.boats.set(playerId, boat);
   }
 
+  startRound(): void {
+    this.roundTimer = ROUND_DURATION;
+    this.roundActive = true;
+    this.netProjectiles.length = 0;
+
+    const boatArray = Array.from(this.boats.values());
+    for (let i = 0; i < boatArray.length; i++) {
+      const boat = boatArray[i];
+      const pos = randomWaterPosition(this.tiles);
+      boat.position = pos;
+      boat.velocity = { x: 0, y: 0 };
+      boat.rotation = (Math.PI * 2 * i) / Math.max(boatArray.length, 1);
+      boat.score = 0;
+      boat.isStunned = false;
+      boat.stunTimer = 0;
+      boat.netCooldown = 0;
+    }
+
+    for (const trap of this.traps) {
+      trap.position = randomWaterPosition(this.tiles);
+      trap.isActive = true;
+      trap.respawnTimer = 0;
+    }
+
+    this.broadcast(MessageType.ROUND_START);
+  }
+
   removeBoat(playerId: string): void {
     this.boats.delete(playerId);
     this.inputs.delete(playerId);
@@ -131,7 +158,7 @@ export class GameRoom {
     this.updateGatorPatrols(dt);
     checkGatorContact(boatArray, this.gators);
 
-    this.broadcastWorldState();
+    this.broadcast(MessageType.STATE);
   }
 
   private updateGatorPatrols(dt: number): void {
@@ -151,21 +178,13 @@ export class GameRoom {
     }
   }
 
-  private broadcastWorldState(): void {
+  private broadcast(type: MessageType): void {
     const worldState: WorldState = {
-      boats: Array.from(this.boats.values()),
-      traps: this.traps,
-      gators: this.gators,
-      netProjectiles: this.netProjectiles,
-      roundTimer: this.roundTimer,
-      roundActive: this.roundActive,
+      boats: Array.from(this.boats.values()), traps: this.traps,
+      gators: this.gators, netProjectiles: this.netProjectiles,
+      roundTimer: this.roundTimer, roundActive: this.roundActive,
     };
-
-    const message = JSON.stringify({
-      type: MessageType.STATE,
-      payload: { worldState, tiles: this.tiles },
-    });
-
+    const message = JSON.stringify({ type, payload: { worldState, tiles: this.tiles } });
     for (const player of this.room.players.values()) {
       if (player.ws.readyState === WebSocket.OPEN) {
         player.ws.send(message);

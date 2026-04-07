@@ -258,3 +258,12 @@ Proceeding to Phase 5 - Step 16.
 **Summary:** Server GameRoom.ts now manages a 3-minute countdown (ROUND_DURATION=180), decremented each tick. roundTimer and roundActive are broadcast in WorldState. Client HUD.ts displays the live countdown with color changes at 60s (yellow) and 30s (red).  
 **Test result:** Passed — Timer counts down from 3:00, changes color, reaches 0:00. Zero type errors on both client and server.  
 **Git commit:** Step 23 — Round timer
+
+---
+
+## Step 24 — Round Start & Spawn
+**Status:** Complete  
+**Date:** 2026-04-07  
+**Summary:** Added startRound() to GameRoom.ts: resets timer, respawns boats at spread locations with unique facing angles, resets scores and traps, broadcasts ROUND_START. NetworkClient handles ROUND_START and ROUND_END messages. Refactored broadcast into shared helper to stay under 200 lines.  
+**Test result:** Passed — Zero type errors on both client and server.  
+**Git commit:** Step 24 — Round start and spawn
