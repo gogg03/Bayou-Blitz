@@ -1,0 +1,119 @@
+import * as THREE from 'three';
+import { TILE_SIZE, TileType, TILE_COLORS } from '../constants/GameConfig';
+
+export class MapRenderer {
+  private mapGroup: THREE.Group;
+  private scene: THREE.Scene;
+
+  constructor(scene: THREE.Scene) {
+    this.scene = scene;
+    this.mapGroup = new THREE.Group();
+    this.scene.add(this.mapGroup);
+  }
+
+  renderMap(tiles: TileType[][]): void {
+    this.clear();
+
+    const rows = tiles.length;
+    const cols = tiles[0].length;
+    const offsetX = -(cols * TILE_SIZE) / 2;
+    const offsetZ = -(rows * TILE_SIZE) / 2;
+
+    const geometriesByType = new Map<TileType, THREE.BufferGeometry[]>();
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const tileType = tiles[row][col];
+        if (!geometriesByType.has(tileType)) {
+          geometriesByType.set(tileType, []);
+        }
+
+        const geo = new THREE.PlaneGeometry(TILE_SIZE, TILE_SIZE);
+        geo.rotateX(-Math.PI / 2);
+        geo.translate(
+          offsetX + col * TILE_SIZE + TILE_SIZE / 2,
+          this.getYForType(tileType),
+          offsetZ + row * TILE_SIZE + TILE_SIZE / 2
+        );
+        geometriesByType.get(tileType)!.push(geo);
+      }
+    }
+
+    for (const [tileType, geos] of geometriesByType) {
+      if (geos.length === 0) continue;
+      const merged = this.mergeGeometries(geos);
+      const material = new THREE.MeshStandardMaterial({
+        color: TILE_COLORS[tileType],
+      });
+      const mesh = new THREE.Mesh(merged, material);
+      this.mapGroup.add(mesh);
+
+      for (const g of geos) g.dispose();
+    }
+  }
+
+  private getYForType(type: TileType): number {
+    switch (type) {
+      case TileType.DOCK:
+        return 0.2;
+      case TileType.LAND:
+      case TileType.REED_WALL:
+        return 0.1;
+      case TileType.GATOR_ZONE:
+        return -0.05;
+      default:
+        return 0;
+    }
+  }
+
+  private mergeGeometries(
+    geometries: THREE.BufferGeometry[]
+  ): THREE.BufferGeometry {
+    const positions: number[] = [];
+    const normals: number[] = [];
+    let indexOffset = 0;
+    const indices: number[] = [];
+
+    for (const geo of geometries) {
+      const pos = geo.getAttribute('position');
+      const norm = geo.getAttribute('normal');
+      const idx = geo.getIndex();
+
+      for (let i = 0; i < pos.count; i++) {
+        positions.push(pos.getX(i), pos.getY(i), pos.getZ(i));
+        normals.push(norm.getX(i), norm.getY(i), norm.getZ(i));
+      }
+
+      if (idx) {
+        const idxArray = idx.array;
+        for (let i = 0; i < idx.count; i++) {
+          indices.push(idxArray[i] + indexOffset);
+        }
+      }
+      indexOffset += pos.count;
+    }
+
+    const merged = new THREE.BufferGeometry();
+    merged.setAttribute(
+      'position',
+      new THREE.Float32BufferAttribute(positions, 3)
+    );
+    merged.setAttribute(
+      'normal',
+      new THREE.Float32BufferAttribute(normals, 3)
+    );
+    merged.setIndex(indices);
+    return merged;
+  }
+
+  clear(): void {
+    while (this.mapGroup.children.length > 0) {
+      const child = this.mapGroup.children[0];
+      this.mapGroup.remove(child);
+      if (child instanceof THREE.Mesh) {
+        child.geometry.dispose();
+        (child.material as THREE.Material).dispose();
+      }
+    }
+  }
+}

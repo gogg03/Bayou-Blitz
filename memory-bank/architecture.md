@@ -275,6 +275,18 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** shared/types.ts  
 **Last updated:** Step 3
 
+### `src/rendering/MapRenderer.ts`
+**Location:** src/rendering/MapRenderer.ts  
+**Responsibility:** Accepts a 2D TileType array and renders merged Three.js meshes per tile type with distinct colors and Y offsets.  
+**Dependencies:** three, constants/GameConfig  
+**Last updated:** Step 7
+
+### `src/constants/GameConfig.ts`
+**Location:** src/constants/GameConfig.ts  
+**Responsibility:** All game constants: tile sizes, map dimensions, physics timers, TileType enum, tile colors.  
+**Dependencies:** None  
+**Last updated:** Step 7
+
 ### `src/vite-env.d.ts`
 **Location:** src/vite-env.d.ts  
 **Responsibility:** Vite client type declarations.  

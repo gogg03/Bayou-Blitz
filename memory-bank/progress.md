@@ -61,3 +61,12 @@
 **Summary:** Created SceneManager.ts with orthographic top-down camera, ambient + directional lighting, and flat green swamp floor plane. Refactored main.ts to use SceneManager.  
 **Test result:** Passed — Flat green rectangle on black background, no perspective distortion, zero console errors, build clean.  
 **Git commit:** Step 6 — Orthographic scene setup
+
+---
+
+## Step 7 — Tile Map Renderer
+**Status:** Complete  
+**Date:** 2026-04-06  
+**Summary:** Built MapRenderer.ts that accepts a 2D tile array and renders merged meshes per tile type. Created GameConfig.ts with TileType enum, tile colors, and game constants. Hardcoded 20x20 test map renders all 5 tile types.  
+**Test result:** Passed — 20x20 grid with water, land, dock, reed wall, and gator zone all render at correct positions with distinct colors. Zero type errors.  
+**Git commit:** Step 7 — Tile map renderer
