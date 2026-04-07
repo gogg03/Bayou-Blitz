@@ -334,3 +334,12 @@ Proceeding to Phase 5 - Step 16.
 **Summary:** Added ParticleSystem.ts for splash effects on knockback (blue spheres with gravity, fading opacity). Trap markers already have neon glow (wireframe + transparent sphere). Scene fog adds atmospheric depth. Particle pool capped at 50 for performance.  
 **Test result:** Passed — Zero type errors.  
 **Git commit:** Step 30 — Visual polish
+
+---
+
+## Step 31 — Boat Name Labels
+**Status:** Complete  
+**Date:** 2026-04-07  
+**Summary:** Added billboard name labels above each boat using Three.js Sprite with CanvasTexture. Names are rendered with white fill and black outline stroke for readability. Sprites always face the camera. BoatRenderer.createBoat now accepts optional name parameter.  
+**Test result:** Passed — Zero type errors.  
+**Git commit:** Step 31 — Boat name labels

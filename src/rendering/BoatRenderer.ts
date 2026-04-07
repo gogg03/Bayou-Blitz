@@ -13,7 +13,7 @@ export class BoatRenderer {
     this.scene = scene;
   }
 
-  createBoat(id: string, color: number = 0xcc4422): THREE.Group {
+  createBoat(id: string, color: number = 0xcc4422, name?: string): THREE.Group {
     const group = new THREE.Group();
 
     const hullGeo = new THREE.BoxGeometry(BOAT_WIDTH, BOAT_HEIGHT, BOAT_LENGTH);
@@ -35,9 +35,34 @@ export class BoatRenderer {
     fan.position.set(0, BOAT_HEIGHT + 2, BOAT_LENGTH / 2 - 2);
     group.add(fan);
 
+    if (name) {
+      const label = this.createLabel(name);
+      label.position.set(0, BOAT_HEIGHT + 12, 0);
+      group.add(label);
+    }
+
     this.scene.add(group);
     this.boatMeshes.set(id, group);
     return group;
+  }
+
+  private createLabel(text: string): THREE.Sprite {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 64;
+    const ctx2d = canvas.getContext('2d')!;
+    ctx2d.font = 'bold 32px Arial';
+    ctx2d.textAlign = 'center';
+    ctx2d.fillStyle = '#ffffff';
+    ctx2d.strokeStyle = '#000000';
+    ctx2d.lineWidth = 4;
+    ctx2d.strokeText(text, 128, 40);
+    ctx2d.fillText(text, 128, 40);
+    const texture = new THREE.CanvasTexture(canvas);
+    const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(32, 8, 1);
+    return sprite;
   }
 
   updateBoat(id: string, x: number, z: number, rotation: number): void {
