@@ -10,6 +10,7 @@ import { GameState } from './game/GameState';
 import { Interpolator } from './game/Interpolator';
 import { HUD } from './ui/HUD';
 import { LobbyScreen } from './ui/LobbyScreen';
+import { RoundSummary } from './ui/RoundSummary';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001/ws';
 
@@ -25,6 +26,7 @@ const gameState = new GameState();
 const interpolator = new Interpolator();
 const hud = new HUD();
 const lobby = new LobbyScreen();
+const roundSummary = new RoundSummary();
 const network = new NetworkClient(WS_URL);
 
 const knownBoats = new Set<string>();
@@ -41,7 +43,12 @@ network.onAssigned((playerId, roomId) => {
 
 network.onRoundStarted(() => {
   lobby.hide();
+  roundSummary.hide();
   mapRenderer.clear();
+});
+
+network.onRoundEnded((scores) => {
+  roundSummary.show(scores, gameState.localPlayerId ?? '');
 });
 
 network.onWorldState((worldState, tiles) => {

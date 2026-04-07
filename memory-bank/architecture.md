@@ -347,6 +347,12 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** three, shared/types  
 **Last updated:** Step 21
 
+### `src/ui/RoundSummary.ts`
+**Location:** src/ui/RoundSummary.ts  
+**Responsibility:** Post-round summary overlay showing ranked scores, global leaderboard from API, and next-round countdown.  
+**Dependencies:** shared/constants  
+**Last updated:** Step 28
+
 ### `src/ui/LobbyScreen.ts`
 **Location:** src/ui/LobbyScreen.ts  
 **Responsibility:** Pre-game lobby overlay with name entry, join button, and status. Auto-hides on connection.  

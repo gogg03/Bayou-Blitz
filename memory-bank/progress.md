@@ -299,3 +299,12 @@ Proceeding to Phase 5 - Step 16.
 **Summary:** Expanded HUD.ts with local player score display, live leaderboard (sorted by score, local player highlighted), net cooldown indicator (red countdown / green "Ready"), and player count. All updated each frame from world state.  
 **Test result:** Passed — Zero type errors.  
 **Git commit:** Step 27 — HUD
+
+---
+
+## Step 28 — Round Summary Screen
+**Status:** Complete  
+**Date:** 2026-04-07  
+**Summary:** Built RoundSummary.ts showing ranked player list with medal emojis, global top 10 leaderboard fetched from /api/scores, and play-again countdown. Submits all non-zero scores to the backend leaderboard. Hides on ROUND_START. Integrated into main.ts with ROUND_END callback.  
+**Test result:** Passed — Zero type errors.  
+**Git commit:** Step 28 — Round summary screen
