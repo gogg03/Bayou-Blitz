@@ -223,3 +223,12 @@ Proceeding to Phase 5 - Step 16.
 **Summary:** Built TrapRenderer.ts rendering traps as orange wireframe cylinders with glowing sphere halos and sine-wave bobbing. Server already handles proximity collection and 10s respawn. Client renders from world state traps array.  
 **Test result:** Passed — Traps render on map, disappear on collection, score increments, reappear after 10s at new location. Zero type errors.  
 **Git commit:** Step 20 — Crawfish traps
+
+---
+
+## Step 21 — Gator Entities
+**Status:** Complete  
+**Date:** 2026-04-07  
+**Summary:** Built GatorRenderer.ts rendering gators as dark-green box bodies with cone tails and red glowing eyes. Gators face their patrol target via atan2. Server already handles patrol movement, contact detection, knockback, and 1s stun.  
+**Test result:** Passed — Gators visible on map, patrol their routes, boat contact triggers knockback + stun. Zero type errors.  
+**Git commit:** Step 21 — Gator entities

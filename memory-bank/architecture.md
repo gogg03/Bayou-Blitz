@@ -341,6 +341,12 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** three, shared/types  
 **Last updated:** Step 20
 
+### `src/rendering/GatorRenderer.ts`
+**Location:** src/rendering/GatorRenderer.ts  
+**Responsibility:** Renders gator entities as green box bodies with cone tails and red glowing eyes. Updates position and facing direction each frame from world state.  
+**Dependencies:** three, shared/types  
+**Last updated:** Step 21
+
 ### `src/game/Interpolator.ts`
 **Location:** src/game/Interpolator.ts  
 **Responsibility:** Smooths boat positions between server tick snapshots using linear interpolation. Eliminates jitter at 20Hz server rate.  
