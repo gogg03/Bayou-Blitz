@@ -88,3 +88,20 @@
 **Summary:** Added camera follow with smooth LERP interpolation to SceneManager. Window.moveCamera(x,z) exposed for console testing. Camera smoothly tracks target with no jitter or snapping.  
 **Test result:** Passed — moveCamera(x,z) via console moves camera smoothly to target. No jitter, no snapping. Full build passes zero errors.  
 **Git commit:** Step 9 — Camera follow
+
+---
+
+## Phase 2 Checkpoint
+- npm run build -> zero errors ✓  
+- All steps in this phase marked complete ✓  
+- architecture.md updated for all new files ✓  
+- All commits to Git ✓
+
+---
+
+## Step 10 — Boat Mesh
+**Status:** Complete  
+**Date:** 2026-04-06  
+**Summary:** Created BoatRenderer.ts with a boat mesh group: colored hull, white cone bow (direction indicator), gray fan at stern. Boat spawns at (0,0) on the map. Window.moveBoat(x,z,rot) exposed for testing.  
+**Test result:** Passed — Boat appears on map at spawn position, facing direction indicator visible and distinct. Full build at Step 10 checkpoint passes.  
+**Git commit:** Step 10 — Boat mesh

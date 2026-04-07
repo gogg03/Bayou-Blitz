@@ -287,6 +287,12 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** three, constants/GameConfig  
 **Last updated:** Step 7
 
+### `src/rendering/BoatRenderer.ts`
+**Location:** src/rendering/BoatRenderer.ts  
+**Responsibility:** Renders boat meshes (hull + bow + fan) with position/rotation updates. Manages a map of boat groups by ID.  
+**Dependencies:** three  
+**Last updated:** Step 10
+
 ### `src/constants/GameConfig.ts`
 **Location:** src/constants/GameConfig.ts  
 **Responsibility:** All game constants: tile sizes, map dimensions, physics timers, TileType enum, tile colors.  
