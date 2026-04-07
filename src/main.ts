@@ -91,6 +91,13 @@ function animate(): void {
     gatorRenderer.updateGators(gameState.worldState.gators);
     netRenderer.updateNets(gameState.worldState.netProjectiles);
     hud.updateTimer(gameState.worldState.roundTimer);
+    hud.updateLeaderboard(gameState.worldState.boats, gameState.localPlayerId ?? '');
+
+    const localBoat = gameState.worldState.boats.find(b => b.id === gameState.localPlayerId);
+    if (localBoat) {
+      hud.updateScore(localBoat.score);
+      hud.updateCooldown(localBoat.netCooldown);
+    }
   }
 
   sceneManager.render();

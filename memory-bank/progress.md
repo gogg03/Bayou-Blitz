@@ -290,3 +290,12 @@ Proceeding to Phase 5 - Step 16.
 **Summary:** Built LobbyScreen.ts with styled name entry input, join button, and status text. Game no longer auto-connects — waits for player to enter name and click Join. Lobby hides on ASSIGN_ID and on ROUND_START. Integrated into main.ts.  
 **Test result:** Passed — Zero type errors.  
 **Git commit:** Step 26 — Lobby screen
+
+---
+
+## Step 27 — HUD
+**Status:** Complete  
+**Date:** 2026-04-07  
+**Summary:** Expanded HUD.ts with local player score display, live leaderboard (sorted by score, local player highlighted), net cooldown indicator (red countdown / green "Ready"), and player count. All updated each frame from world state.  
+**Test result:** Passed — Zero type errors.  
+**Git commit:** Step 27 — HUD
