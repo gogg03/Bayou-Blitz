@@ -3,6 +3,7 @@ import { MapRenderer } from './rendering/MapRenderer';
 import { BoatRenderer } from './rendering/BoatRenderer';
 import { InputController } from './input/InputController';
 import { generateMap } from './game/MapGenerator';
+import { createLocalBoat, updateLocalBoat } from './game/LocalPhysics';
 
 if (import.meta.env.DEV) {
   console.log('WS_URL:', import.meta.env.VITE_WS_URL);
@@ -13,11 +14,12 @@ const app = document.getElementById('app')!;
 const sceneManager = new SceneManager(app);
 const mapRenderer = new MapRenderer(sceneManager.scene);
 const boatRenderer = new BoatRenderer(sceneManager.scene);
+const inputController = new InputController();
 
 let currentMap = generateMap();
 mapRenderer.renderMap(currentMap);
 
-const inputController = new InputController();
+const localBoat = createLocalBoat(0, 0);
 
 boatRenderer.createBoat('local', 0xcc4422);
 boatRenderer.updateBoat('local', 0, 0, 0);
@@ -28,28 +30,24 @@ const devWindow = window as unknown as Record<string, unknown>;
 devWindow.nextMap = () => {
   currentMap = generateMap();
   mapRenderer.renderMap(currentMap);
+  localBoat.x = 0;
+  localBoat.z = 0;
+  localBoat.vx = 0;
+  localBoat.vz = 0;
 };
 
-devWindow.moveCamera = (x: number, z: number) => {
-  sceneManager.setFollowTarget(x, z);
-};
-
-devWindow.moveBoat = (x: number, z: number, rot: number = 0) => {
-  boatRenderer.updateBoat('local', x, z, rot);
-  sceneManager.setFollowTarget(x, z);
-};
-
-let lastLogTime = 0;
+let lastTime = performance.now();
 
 function animate(): void {
-  const input = inputController.getInput('local');
-
   const now = performance.now();
-  if ((input.throttle !== 0 || input.steer !== 0 || input.fireNet) && now - lastLogTime > 200) {
-    console.log('Input:', JSON.stringify(input));
-    lastLogTime = now;
-  }
+  const dt = Math.min((now - lastTime) / 1000, 0.05);
+  lastTime = now;
 
+  const input = inputController.getInput('local');
+  updateLocalBoat(localBoat, input, dt, currentMap);
+
+  boatRenderer.updateBoat('local', localBoat.x, localBoat.z, localBoat.rotation);
+  sceneManager.setFollowTarget(localBoat.x, localBoat.z);
   sceneManager.render();
   requestAnimationFrame(animate);
 }

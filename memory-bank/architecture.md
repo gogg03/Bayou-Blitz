@@ -287,6 +287,18 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** three, constants/GameConfig  
 **Last updated:** Step 7
 
+### `src/game/LocalPhysics.ts`
+**Location:** src/game/LocalPhysics.ts  
+**Responsibility:** Temporary client-side airboat physics for visual testing. Handles momentum, drag, drift, tile collision. Will be replaced by server-authoritative physics in Step 18.  
+**Dependencies:** shared/types, constants/GameConfig, constants/BoatConfig  
+**Last updated:** Step 12
+
+### `src/constants/BoatConfig.ts`
+**Location:** src/constants/BoatConfig.ts  
+**Responsibility:** Boat physics constants: acceleration, drag, turn speed, max speed, drift factor.  
+**Dependencies:** None  
+**Last updated:** Step 12
+
 ### `src/input/InputController.ts`
 **Location:** src/input/InputController.ts  
 **Responsibility:** Reads WASD/arrow key state and produces InputEvent objects with throttle, steer, and fireNet values.  

@@ -114,3 +114,12 @@
 **Summary:** Built InputController.ts that reads WASD/arrow key state each frame and produces an InputEvent (throttle, steer, fireNet). Space fires net as one-shot. Console logs active inputs.  
 **Test result:** Passed — WASD keys produce correct InputEvent values. No missed inputs, no duplicate fires. Zero type errors.  
 **Git commit:** Step 11 — Input handler
+
+---
+
+## Step 12 — Local Physics Preview
+**Status:** Complete  
+**Date:** 2026-04-06  
+**Summary:** Implemented temporary client-side momentum-based airboat physics. Boat drifts on turns, accelerates/decelerates with drag, collides with solid tiles. Created BoatConfig.ts for physics constants and LocalPhysics.ts for movement logic.  
+**Test result:** Passed — Boat moves with airboat feel (slides on turns, doesn't stop instantly). Boat cannot drive through reed walls or land tiles. Zero type errors.  
+**Git commit:** Step 12 — Local physics preview
