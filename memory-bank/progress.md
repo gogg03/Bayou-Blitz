@@ -130,7 +130,9 @@
 - npm run build -> zero errors ✓  
 - All steps in this phase marked complete ✓  
 - architecture.md updated for all new files ✓  
-- All commits to Git ✓
+- All commits to Git ✓  
+
+Proceeding to Phase 5 - Step 16.
 
 ---
 
@@ -165,4 +167,15 @@
 - npm run build -> zero errors ✓ (both client and server)  
 - All steps in this phase marked complete ✓  
 - architecture.md updated for all new files ✓  
-- All commits to Git ✓
+- All commits to Git ✓  
+
+Proceeding to Phase 5 - Step 16.
+
+---
+
+## Step 16 — Server Physics Engine
+**Status:** Complete  
+**Date:** 2026-04-06  
+**Summary:** Built server/Physics.ts and server/PhysicsHelpers.ts with stateless physics functions: boat movement (momentum, drag, drift, tile collision), boat-to-boat collision (momentum transfer), trap proximity collection, gator zone contact (knockback + stun), and net stun. Consolidated all physics constants into shared/constants.ts. Client GameConfig.ts now re-exports from shared.  
+**Test result:** Passed — Unit tests verify correct velocity changes, collision responses, trap collection, and gator stun.  
+**Git commit:** Step 16 — Server physics engine

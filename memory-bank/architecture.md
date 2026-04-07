@@ -287,6 +287,24 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** three, constants/GameConfig  
 **Last updated:** Step 7
 
+### `shared/constants.ts`
+**Location:** shared/constants.ts  
+**Responsibility:** All shared game constants: tile sizes, map dimensions, physics parameters, boat config, collision values. Used by both client and server.  
+**Dependencies:** None  
+**Last updated:** Step 16
+
+### `server/Physics.ts`
+**Location:** server/Physics.ts  
+**Responsibility:** Stateless server-authoritative physics functions: boat movement, boat-to-boat collision, trap collection, gator contact, net stun.  
+**Dependencies:** shared/types, shared/constants, server/PhysicsHelpers  
+**Last updated:** Step 16
+
+### `server/PhysicsHelpers.ts`
+**Location:** server/PhysicsHelpers.ts  
+**Responsibility:** Pure helper functions for physics: forwardDir, applyDrift, clampSpeed, isSolidTile, randomWaterPosition.  
+**Dependencies:** shared/types, shared/constants  
+**Last updated:** Step 16
+
 ### `server/db.ts`
 **Location:** server/db.ts  
 **Responsibility:** SQLite database connection via better-sqlite3. Creates scores table on startup. Provides addScore and getLeaderboard query helpers.  

@@ -1,13 +1,14 @@
-import type { InputEvent, Vec2 } from '../../shared/types';
-import { TileType, TILE_SIZE } from '../constants/GameConfig';
+import type { InputEvent } from '../../shared/types';
 import {
+  TileType,
+  TILE_SIZE,
   BOAT_ACCELERATION,
   BOAT_REVERSE_ACCELERATION,
   BOAT_DRAG,
   BOAT_TURN_SPEED,
   BOAT_MAX_SPEED,
   BOAT_DRIFT_FACTOR,
-} from '../constants/BoatConfig';
+} from '../constants/GameConfig';
 
 export interface LocalBoatState {
   x: number;
