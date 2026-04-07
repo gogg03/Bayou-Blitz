@@ -31,6 +31,7 @@ export class SceneManager {
       1000
     );
     this.camera.position.set(0, 100, 0);
+    this.camera.up.set(0, 0, -1);
     this.camera.lookAt(0, 0, 0);
 
     this.setupLighting();

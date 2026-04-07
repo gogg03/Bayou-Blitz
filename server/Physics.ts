@@ -32,7 +32,7 @@ export function updateBoatPhysics(
   const turnFactor = Math.min(speed / 50, 1);
 
   if (!boat.isStunned) {
-    boat.rotation += input.steer * BOAT_TURN_SPEED * turnFactor * dt;
+    boat.rotation -= input.steer * BOAT_TURN_SPEED * turnFactor * dt;
   }
 
   const fwd = forwardDir(boat.rotation);
