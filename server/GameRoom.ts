@@ -1,14 +1,9 @@
 import { WebSocket } from 'ws';
-import type { BoatState, TrapState, GatorState, WorldState, InputEvent, Vec2, NetProjectile } from '../shared/types';
-import { MessageType } from '../shared/types';
-import { TICK_INTERVAL_MS, TileType, TILE_SIZE, ROUND_DURATION } from '../shared/constants';
+import { MessageType, type BoatState, type TrapState, type GatorState, type WorldState, type InputEvent, type Vec2, type NetProjectile } from '../shared/types';
+import { TICK_INTERVAL_MS, TileType, TILE_SIZE, ROUND_DURATION, RESULTS_DISPLAY_TIME } from '../shared/constants';
 import { generateMap } from '../shared/MapGenerator';
-import {
-  updateBoatPhysics, resolveBoatCollisions,
-  checkTrapCollection, updateTrapTimers, checkGatorContact,
-  tryFireNet, updateNetProjectiles,
-} from './Physics';
-import { randomWaterPosition } from './PhysicsHelpers';
+import { updateBoatPhysics, resolveBoatCollisions, checkTrapCollection, updateTrapTimers, checkGatorContact, tryFireNet, updateNetProjectiles } from './Physics';
+import { randomWaterPosition, updateGatorPatrolPositions } from './PhysicsHelpers';
 import type { Room } from './RoomManager';
 
 const TRAP_COUNT = 15;
@@ -26,6 +21,7 @@ export class GameRoom {
   private room: Room;
   private roundTimer: number = ROUND_DURATION;
   private roundActive: boolean = true;
+  private resultsTimer: number = 0;
 
   constructor(room: Room) {
     this.room = room;
@@ -131,24 +127,31 @@ export class GameRoom {
   private tick(): void {
     const dt = TICK_INTERVAL_MS / 1000;
 
-    if (this.roundActive) {
-      this.roundTimer -= dt;
-      if (this.roundTimer <= 0) {
-        this.roundTimer = 0;
-        this.roundActive = false;
+    if (!this.roundActive) {
+      this.resultsTimer -= dt;
+      if (this.resultsTimer <= 0) {
+        this.startRound();
       }
+      this.broadcast(MessageType.STATE);
+      return;
+    }
+
+    this.roundTimer -= dt;
+    if (this.roundTimer <= 0) {
+      this.roundTimer = 0;
+      this.roundActive = false;
+      this.resultsTimer = RESULTS_DISPLAY_TIME;
+      this.broadcastRoundEnd();
+      return;
     }
 
     const boatArray = Array.from(this.boats.values());
-
     for (const boat of boatArray) {
       const input = this.inputs.get(boat.id) ?? {
         playerId: boat.id, throttle: 0, steer: 0, fireNet: false,
       };
       updateBoatPhysics(boat, input, dt, this.tiles);
-      if (input.fireNet) {
-        tryFireNet(boat, this.netProjectiles, this.netIdCounter);
-      }
+      if (input.fireNet) tryFireNet(boat, this.netProjectiles, this.netIdCounter);
     }
 
     resolveBoatCollisions(boatArray);
@@ -157,25 +160,21 @@ export class GameRoom {
     updateTrapTimers(this.traps, dt, this.tiles);
     this.updateGatorPatrols(dt);
     checkGatorContact(boatArray, this.gators);
-
     this.broadcast(MessageType.STATE);
   }
 
-  private updateGatorPatrols(dt: number): void {
-    const speed = 30;
-    for (const gator of this.gators) {
-      if (gator.patrolPath.length === 0) continue;
-      const target = gator.patrolPath[gator.patrolPathIndex];
-      const dx = target.x - gator.position.x;
-      const dy = target.y - gator.position.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 5) {
-        gator.patrolPathIndex = (gator.patrolPathIndex + 1) % gator.patrolPath.length;
-      } else {
-        gator.position.x += (dx / dist) * speed * dt;
-        gator.position.y += (dy / dist) * speed * dt;
-      }
+  private broadcastRoundEnd(): void {
+    const scores = Array.from(this.boats.values()).map(b => ({
+      id: b.id, name: b.name, score: b.score,
+    })).sort((a, b) => b.score - a.score);
+    const message = JSON.stringify({ type: MessageType.ROUND_END, payload: { scores } });
+    for (const player of this.room.players.values()) {
+      if (player.ws.readyState === WebSocket.OPEN) player.ws.send(message);
     }
+  }
+
+  private updateGatorPatrols(dt: number): void {
+    updateGatorPatrolPositions(this.gators, dt);
   }
 
   private broadcast(type: MessageType): void {

@@ -267,3 +267,12 @@ Proceeding to Phase 5 - Step 16.
 **Summary:** Added startRound() to GameRoom.ts: resets timer, respawns boats at spread locations with unique facing angles, resets scores and traps, broadcasts ROUND_START. NetworkClient handles ROUND_START and ROUND_END messages. Refactored broadcast into shared helper to stay under 200 lines.  
 **Test result:** Passed — Zero type errors on both client and server.  
 **Git commit:** Step 24 — Round start and spawn
+
+---
+
+## Step 25 — Round End
+**Status:** Complete  
+**Date:** 2026-04-07  
+**Summary:** When round timer reaches zero, server sets roundActive=false, broadcasts ROUND_END with sorted scores, starts a 10s results countdown. After results timeout, calls startRound() to reset and begin a new round. Physics stops processing during results phase. Extracted gator patrol logic to PhysicsHelpers to keep GameRoom under 200 lines.  
+**Test result:** Passed — Zero type errors on both client and server.  
+**Git commit:** Step 25 — Round end

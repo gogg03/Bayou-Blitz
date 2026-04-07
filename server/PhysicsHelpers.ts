@@ -1,4 +1,4 @@
-import type { BoatState, Vec2, NetProjectile } from '../shared/types';
+import type { BoatState, Vec2, NetProjectile, GatorState } from '../shared/types';
 import {
   TILE_SIZE, TileType, BOAT_MAX_SPEED, BOAT_DRIFT_FACTOR,
   NET_RANGE, NET_STUN_DURATION, BOAT_COLLISION_RADIUS,
@@ -89,5 +89,23 @@ export function updateNetProjectiles(
       }
     }
     if (hit) nets.splice(i, 1);
+  }
+}
+
+const GATOR_PATROL_SPEED = 30;
+
+export function updateGatorPatrolPositions(gators: GatorState[], dt: number): void {
+  for (const gator of gators) {
+    if (gator.patrolPath.length === 0) continue;
+    const target = gator.patrolPath[gator.patrolPathIndex];
+    const dx = target.x - gator.position.x;
+    const dy = target.y - gator.position.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 5) {
+      gator.patrolPathIndex = (gator.patrolPathIndex + 1) % gator.patrolPath.length;
+    } else {
+      gator.position.x += (dx / dist) * GATOR_PATROL_SPEED * dt;
+      gator.position.y += (dy / dist) * GATOR_PATROL_SPEED * dt;
+    }
   }
 }
