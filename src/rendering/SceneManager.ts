@@ -5,6 +5,8 @@ const CAMERA_DISTANCE = 350;
 const CAMERA_ANGLE = Math.PI / 4;
 const MIN_POLAR = Math.PI / 8;
 const MAX_POLAR = Math.PI / 2.5;
+const AUTO_FOLLOW_LERP = 0.03;
+const RELEASE_RETURN_DELAY = 1500;
 
 export class SceneManager {
   readonly renderer: THREE.WebGLRenderer;
@@ -12,7 +14,9 @@ export class SceneManager {
   readonly camera: THREE.PerspectiveCamera;
   private controls: OrbitControls;
   private followTarget: { x: number; z: number } | null = null;
-  private cameraOffset: THREE.Vector3;
+  private followRotation: number = 0;
+  private userOrbiting = false;
+  private orbitReleaseTime = 0;
 
   constructor(container: HTMLElement) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -26,20 +30,14 @@ export class SceneManager {
 
     const aspect = window.innerWidth / window.innerHeight;
     this.camera = new THREE.PerspectiveCamera(50, aspect, 1, 3000);
-
-    this.cameraOffset = new THREE.Vector3(
-      0,
-      Math.sin(CAMERA_ANGLE) * CAMERA_DISTANCE,
-      Math.cos(CAMERA_ANGLE) * CAMERA_DISTANCE
-    );
-    this.camera.position.copy(this.cameraOffset);
+    this.camera.position.set(0, Math.sin(CAMERA_ANGLE) * CAMERA_DISTANCE, Math.cos(CAMERA_ANGLE) * CAMERA_DISTANCE);
     this.camera.lookAt(0, 0, 0);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.mouseButtons = {
       LEFT: -1 as THREE.MOUSE,
       MIDDLE: THREE.MOUSE.ROTATE,
-      RIGHT: -1 as THREE.MOUSE,
+      RIGHT: THREE.MOUSE.ROTATE,
     };
     this.controls.enablePan = false;
     this.controls.enableZoom = true;
@@ -50,16 +48,20 @@ export class SceneManager {
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.1;
 
+    this.controls.addEventListener('start', () => { this.userOrbiting = true; });
+    this.controls.addEventListener('end', () => {
+      this.userOrbiting = false;
+      this.orbitReleaseTime = performance.now();
+    });
+
     this.setupLighting();
     this.createSwampFloor();
-
     window.addEventListener('resize', () => this.onResize());
   }
 
   private setupLighting(): void {
     const ambient = new THREE.AmbientLight(0xffd59e, 0.6);
     this.scene.add(ambient);
-
     const directional = new THREE.DirectionalLight(0xffecd2, 0.8);
     directional.position.set(50, 100, 30);
     this.scene.add(directional);
@@ -84,12 +86,30 @@ export class SceneManager {
     this.followTarget = { x, z };
   }
 
+  setFollowRotation(rotation: number): void {
+    this.followRotation = rotation;
+  }
+
   update(): void {
     if (this.followTarget) {
-      this.controls.target.x = this.followTarget.x;
-      this.controls.target.z = this.followTarget.z;
-      this.controls.target.y = 0;
+      this.controls.target.set(this.followTarget.x, 0, this.followTarget.z);
     }
+
+    if (!this.userOrbiting && performance.now() - this.orbitReleaseTime > RELEASE_RETURN_DELAY) {
+      const desiredAzimuth = this.followRotation + Math.PI;
+      const current = this.controls.getAzimuthalAngle();
+      let diff = desiredAzimuth - current;
+      while (diff > Math.PI) diff -= Math.PI * 2;
+      while (diff < -Math.PI) diff += Math.PI * 2;
+
+      const spherical = new THREE.Spherical().setFromVector3(
+        this.camera.position.clone().sub(this.controls.target)
+      );
+      spherical.theta += diff * AUTO_FOLLOW_LERP;
+      const newPos = new THREE.Vector3().setFromSpherical(spherical).add(this.controls.target);
+      this.camera.position.copy(newPos);
+    }
+
     this.controls.update();
   }
 

@@ -100,6 +100,7 @@ function animate(): void {
       boatRenderer.updateBoat(id, interp.x, interp.y, interp.rotation);
       if (id === gameState.localPlayerId) {
         sceneManager.setFollowTarget(interp.x, interp.y);
+        sceneManager.setFollowRotation(interp.rotation);
       }
     }
   }
