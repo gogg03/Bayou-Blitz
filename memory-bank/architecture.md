@@ -287,6 +287,12 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** three, constants/GameConfig  
 **Last updated:** Step 7
 
+### `src/input/InputController.ts`
+**Location:** src/input/InputController.ts  
+**Responsibility:** Reads WASD/arrow key state and produces InputEvent objects with throttle, steer, and fireNet values.  
+**Dependencies:** shared/types  
+**Last updated:** Step 11
+
 ### `src/rendering/BoatRenderer.ts`
 **Location:** src/rendering/BoatRenderer.ts  
 **Responsibility:** Renders boat meshes (hull + bow + fan) with position/rotation updates. Manages a map of boat groups by ID.  

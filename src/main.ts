@@ -1,6 +1,7 @@
 import { SceneManager } from './rendering/SceneManager';
 import { MapRenderer } from './rendering/MapRenderer';
 import { BoatRenderer } from './rendering/BoatRenderer';
+import { InputController } from './input/InputController';
 import { generateMap } from './game/MapGenerator';
 
 if (import.meta.env.DEV) {
@@ -15,6 +16,8 @@ const boatRenderer = new BoatRenderer(sceneManager.scene);
 
 let currentMap = generateMap();
 mapRenderer.renderMap(currentMap);
+
+const inputController = new InputController();
 
 boatRenderer.createBoat('local', 0xcc4422);
 boatRenderer.updateBoat('local', 0, 0, 0);
@@ -36,7 +39,17 @@ devWindow.moveBoat = (x: number, z: number, rot: number = 0) => {
   sceneManager.setFollowTarget(x, z);
 };
 
+let lastLogTime = 0;
+
 function animate(): void {
+  const input = inputController.getInput('local');
+
+  const now = performance.now();
+  if ((input.throttle !== 0 || input.steer !== 0 || input.fireNet) && now - lastLogTime > 200) {
+    console.log('Input:', JSON.stringify(input));
+    lastLogTime = now;
+  }
+
   sceneManager.render();
   requestAnimationFrame(animate);
 }

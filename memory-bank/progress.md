@@ -105,3 +105,12 @@
 **Summary:** Created BoatRenderer.ts with a boat mesh group: colored hull, white cone bow (direction indicator), gray fan at stern. Boat spawns at (0,0) on the map. Window.moveBoat(x,z,rot) exposed for testing.  
 **Test result:** Passed — Boat appears on map at spawn position, facing direction indicator visible and distinct. Full build at Step 10 checkpoint passes.  
 **Git commit:** Step 10 — Boat mesh
+
+---
+
+## Step 11 — Input Handler
+**Status:** Complete  
+**Date:** 2026-04-06  
+**Summary:** Built InputController.ts that reads WASD/arrow key state each frame and produces an InputEvent (throttle, steer, fireNet). Space fires net as one-shot. Console logs active inputs.  
+**Test result:** Passed — WASD keys produce correct InputEvent values. No missed inputs, no duplicate fires. Zero type errors.  
+**Git commit:** Step 11 — Input handler
