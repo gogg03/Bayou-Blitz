@@ -149,3 +149,20 @@
 **Summary:** Built RoomManager.ts with player assignment, room creation/destruction, player/room ID generation, and broadcast helpers. Updated server/index.ts to use RoomManager for connection handling and JOIN message processing.  
 **Test result:** Passed — Two browser tabs both receive unique player IDs and the same room ID. Server logs show both in the same room.  
 **Git commit:** Step 14 — Room manager
+
+---
+
+## Step 15 — SQLite Leaderboard
+**Status:** Complete  
+**Date:** 2026-04-06  
+**Summary:** Built server/db.ts with better-sqlite3 (scores table auto-created on startup) and server/routes/scores.ts with POST and GET endpoints. Mounted at /api/scores.  
+**Test result:** Passed — POST 3 scores, GET leaderboard returns them sorted by score desc. Data persists. Full build at Step 15 checkpoint: zero type errors.  
+**Git commit:** Step 15 — SQLite leaderboard
+
+---
+
+## Phase 4 Checkpoint
+- npm run build -> zero errors ✓ (both client and server)  
+- All steps in this phase marked complete ✓  
+- architecture.md updated for all new files ✓  
+- All commits to Git ✓

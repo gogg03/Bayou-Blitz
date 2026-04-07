@@ -287,6 +287,18 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** three, constants/GameConfig  
 **Last updated:** Step 7
 
+### `server/db.ts`
+**Location:** server/db.ts  
+**Responsibility:** SQLite database connection via better-sqlite3. Creates scores table on startup. Provides addScore and getLeaderboard query helpers.  
+**Dependencies:** better-sqlite3  
+**Last updated:** Step 15
+
+### `server/routes/scores.ts`
+**Location:** server/routes/scores.ts  
+**Responsibility:** Express route handlers for POST /api/scores and GET /api/scores (top 10 leaderboard).  
+**Dependencies:** express, server/db  
+**Last updated:** Step 15
+
 ### `server/RoomManager.ts`
 **Location:** server/RoomManager.ts  
 **Responsibility:** Creates and manages game rooms. Assigns players to rooms, handles join/leave, generates player/room IDs, provides broadcast helpers.  

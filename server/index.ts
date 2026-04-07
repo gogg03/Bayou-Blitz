@@ -5,6 +5,7 @@ import { MessageType } from '../shared/types';
 import type { WsMessage } from '../shared/types';
 import { RoomManager } from './RoomManager';
 import type { PlayerConnection } from './RoomManager';
+import scoresRouter from './routes/scores';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
 
@@ -14,6 +15,8 @@ app.use(express.json());
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
+
+app.use('/api', scoresRouter);
 
 const httpServer = createServer(app);
 const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
