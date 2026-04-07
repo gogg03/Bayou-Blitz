@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-const CAMERA_LERP_SPEED = 0.08;
 const CAMERA_DISTANCE = 350;
 const CAMERA_ANGLE = Math.PI / 4;
 const MIN_POLAR = Math.PI / 8;
@@ -40,8 +39,9 @@ export class SceneManager {
     this.controls.mouseButtons = {
       LEFT: -1 as THREE.MOUSE,
       MIDDLE: THREE.MOUSE.ROTATE,
-      RIGHT: THREE.MOUSE.PAN,
+      RIGHT: -1 as THREE.MOUSE,
     };
+    this.controls.enablePan = false;
     this.controls.enableZoom = true;
     this.controls.minDistance = 100;
     this.controls.maxDistance = 800;
@@ -86,9 +86,9 @@ export class SceneManager {
 
   update(): void {
     if (this.followTarget) {
-      const target = this.controls.target;
-      target.x += (this.followTarget.x - target.x) * CAMERA_LERP_SPEED;
-      target.z += (this.followTarget.z - target.z) * CAMERA_LERP_SPEED;
+      this.controls.target.x = this.followTarget.x;
+      this.controls.target.z = this.followTarget.z;
+      this.controls.target.y = 0;
     }
     this.controls.update();
   }
