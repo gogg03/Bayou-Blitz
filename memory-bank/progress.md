@@ -70,3 +70,12 @@
 **Summary:** Built MapRenderer.ts that accepts a 2D tile array and renders merged meshes per tile type. Created GameConfig.ts with TileType enum, tile colors, and game constants. Hardcoded 20x20 test map renders all 5 tile types.  
 **Test result:** Passed — 20x20 grid with water, land, dock, reed wall, and gator zone all render at correct positions with distinct colors. Zero type errors.  
 **Git commit:** Step 7 — Tile map renderer
+
+---
+
+## Step 8 — Procedural Map Generator
+**Status:** Complete  
+**Date:** 2026-04-06  
+**Summary:** Built MapGenerator.ts with procedural swamp generation: water highways (4), tight corridors (2), water pockets, dock platforms, reed wall clusters, gator zones, and border reeds. Each map has randomized channel wobble for variety. Window.nextMap() exposed for testing.  
+**Test result:** Passed — Multiple maps generate and render correctly with distinct layouts. All include open water routes and tight corridors.  
+**Git commit:** Step 8 — Procedural map generator

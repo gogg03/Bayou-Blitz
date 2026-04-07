@@ -275,6 +275,12 @@ The server is the single source of truth. The client never modifies world state 
 **Dependencies:** shared/types.ts  
 **Last updated:** Step 3
 
+### `src/game/MapGenerator.ts`
+**Location:** src/game/MapGenerator.ts  
+**Responsibility:** Procedural swamp map generation. Produces a 2D TileType array with water highways, corridors, docks, reed walls, gator zones, and border reeds.  
+**Dependencies:** constants/GameConfig  
+**Last updated:** Step 8
+
 ### `src/rendering/MapRenderer.ts`
 **Location:** src/rendering/MapRenderer.ts  
 **Responsibility:** Accepts a 2D TileType array and renders merged Three.js meshes per tile type with distinct colors and Y offsets.  
