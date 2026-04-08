@@ -1,61 +1,109 @@
 import { RESULTS_DISPLAY_TIME } from '../../shared/constants';
 
-interface ScoreEntry {
-  id: string;
-  name: string;
-  score: number;
-}
+interface ScoreEntry { id: string; name: string; score: number; }
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+
+const RANK_COLORS = ['#d4920a', '#a8b0b8', '#a0724a'];
+const RANK_LABELS = ['\u{1F451}', '\u{1F948}', '\u{1F949}'];
+
+function el<K extends keyof HTMLElementTagNameMap>(tag: K, styles: Partial<CSSStyleDeclaration>, parent?: HTMLElement): HTMLElementTagNameMap[K] {
+  const e = document.createElement(tag);
+  Object.assign(e.style, styles);
+  parent?.appendChild(e);
+  return e;
+}
 
 export class RoundSummary {
   private overlay: HTMLDivElement;
   private rankingsEl: HTMLDivElement;
-  private globalEl: HTMLDivElement;
+  private globalBody: HTMLDivElement;
   private countdownEl: HTMLDivElement;
-  private countdownTimer: number = 0;
+  private countdownTimer = 0;
   private intervalId: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
-    this.overlay = document.createElement('div');
-    Object.assign(this.overlay.style, {
+    this.overlay = el('div', {
       position: 'fixed', inset: '0', display: 'none',
       flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(10,26,13,0.88)', zIndex: '50',
-      fontFamily: "'Segoe UI', Arial, sans-serif", color: '#fff',
+      background: 'radial-gradient(ellipse at center, rgba(13,34,17,0.92) 0%, rgba(10,26,13,0.96) 100%)',
+      zIndex: '50', fontFamily: "'Segoe UI', Arial, sans-serif", color: '#e0d8c8',
     });
 
-    const title = document.createElement('h2');
-    title.textContent = 'Round Over';
-    Object.assign(title.style, { color: '#ff9900', fontSize: '36px', marginBottom: '16px' });
-    this.overlay.appendChild(title);
+    const container = el('div', {
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      maxWidth: '520px', width: '90%', maxHeight: '90vh', overflowY: 'auto',
+    }, this.overlay);
 
-    this.rankingsEl = document.createElement('div');
-    Object.assign(this.rankingsEl.style, { marginBottom: '24px', fontSize: '18px', lineHeight: '1.8' });
-    this.overlay.appendChild(this.rankingsEl);
+    const title = el('h2', {
+      color: '#d4920a', fontSize: '42px', margin: '0 0 6px',
+      textTransform: 'uppercase', letterSpacing: '6px', fontWeight: '900',
+      textShadow: '0 0 20px rgba(212,146,10,0.6), 0 0 40px rgba(212,146,10,0.3)',
+    }, container);
+    title.textContent = 'ROUND OVER';
 
-    const globalTitle = document.createElement('h3');
-    globalTitle.textContent = 'Global Leaderboard';
-    Object.assign(globalTitle.style, { color: '#aaa', fontSize: '16px', marginBottom: '8px' });
-    this.overlay.appendChild(globalTitle);
+    const divider = el('div', {
+      width: '80%', height: '2px', margin: '0 0 18px',
+      background: 'linear-gradient(90deg, transparent, #c47f08, transparent)',
+    }, container);
 
-    this.globalEl = document.createElement('div');
-    Object.assign(this.globalEl.style, { marginBottom: '24px', fontSize: '14px', lineHeight: '1.6', color: '#ccc' });
-    this.overlay.appendChild(this.globalEl);
+    const rankPanel = el('div', {
+      width: '100%', padding: '14px 18px', marginBottom: '16px',
+      background: 'rgba(10,26,13,0.7)', border: '1px solid rgba(196,127,8,0.25)',
+      borderRadius: '8px', boxSizing: 'border-box',
+    }, container);
 
-    this.countdownEl = document.createElement('div');
-    Object.assign(this.countdownEl.style, { fontSize: '16px', color: '#aaa' });
-    this.overlay.appendChild(this.countdownEl);
+    this.rankingsEl = el('div', { lineHeight: '1.9' }, rankPanel);
+
+    const globalPanel = el('div', {
+      width: '100%', padding: '14px 18px', marginBottom: '18px',
+      background: 'rgba(10,26,13,0.7)', border: '1px solid rgba(255,255,255,0.08)',
+      borderRadius: '8px', boxSizing: 'border-box',
+    }, container);
+
+    const globalTitle = el('div', {
+      color: '#a09880', fontSize: '13px', fontWeight: '700',
+      letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '10px',
+    }, globalPanel);
+    globalTitle.textContent = 'ALL-TIME BEST';
+
+    this.globalBody = el('div', { fontSize: '14px', lineHeight: '1.7', color: '#b0a890' }, globalPanel);
+
+    this.countdownEl = el('div', {
+      fontSize: '16px', color: '#a09880', letterSpacing: '1px', transition: 'color 0.3s',
+    }, container);
 
     document.body.appendChild(this.overlay);
   }
 
   show(scores: ScoreEntry[], localId: string): void {
-    this.rankingsEl.innerHTML = scores.map((s, i) => {
-      const hl = s.id === localId ? 'color:#ff9900;font-weight:bold' : '';
-      const medal = i === 0 ? ' &#x1F947;' : i === 1 ? ' &#x1F948;' : i === 2 ? ' &#x1F949;' : '';
-      return `<div style="${hl}">${i + 1}. ${s.name}: ${s.score}${medal}</div>`;
-    }).join('');
+    this.rankingsEl.innerHTML = '';
+    scores.forEach((s, i) => {
+      const row = el('div', {
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '2px 6px', borderRadius: '4px',
+        background: s.id === localId ? 'rgba(212,146,10,0.12)' : 'transparent',
+      }, this.rankingsEl);
+
+      const left = el('span', { fontWeight: i < 3 ? '700' : '400' }, row);
+      const rankColor = s.id === localId ? '#d4920a' : (RANK_COLORS[i] || '#e0d8c8');
+      const label = RANK_LABELS[i] || `${i + 1}.`;
+      left.innerHTML = `<span style="margin-right:8px;font-size:${i === 0 ? '20px' : '16px'}">${label}</span>` +
+        `<span style="color:${rankColor}">${s.name}</span>`;
+
+      const right = el('span', {
+        color: rankColor, fontWeight: '700',
+        fontSize: i === 0 ? '20px' : '16px',
+      }, row);
+      right.textContent = `${s.score}`;
+
+      if (i === 0) {
+        Object.assign(row.style, {
+          fontSize: '18px', padding: '4px 8px',
+          boxShadow: '0 0 12px rgba(212,146,10,0.15)',
+        });
+      }
+    });
 
     this.overlay.style.display = 'flex';
     this.countdownTimer = RESULTS_DISPLAY_TIME;
@@ -71,32 +119,40 @@ export class RoundSummary {
       }
     }, 1000);
 
-    this.fetchGlobalLeaderboard();
     this.submitScores(scores);
+    this.fetchGlobalLeaderboard();
   }
 
   hide(): void {
     this.overlay.style.display = 'none';
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
-    }
+    if (this.intervalId) { clearInterval(this.intervalId); this.intervalId = null; }
   }
 
   private updateCountdown(): void {
     const t = Math.max(0, Math.ceil(this.countdownTimer));
     this.countdownEl.textContent = `Next round in ${t}s`;
+    const urgency = 1 - t / RESULTS_DISPLAY_TIME;
+    const r = Math.round(160 + urgency * 52);
+    const g = Math.round(152 - urgency * 80);
+    const b = Math.round(128 - urgency * 100);
+    this.countdownEl.style.color = `rgb(${r},${g},${b})`;
+    this.countdownEl.style.textShadow = urgency > 0.7 ? '0 0 8px rgba(212,146,10,0.5)' : 'none';
   }
 
   private async fetchGlobalLeaderboard(): Promise<void> {
+    this.globalBody.textContent = 'Loading\u2026';
     try {
       const res = await fetch(`${API_BASE}/scores`);
       const data = await res.json() as { name: string; score: number }[];
-      this.globalEl.innerHTML = data.map((s, i) =>
-        `<div>${i + 1}. ${s.name}: ${s.score}</div>`
-      ).join('');
+      if (!data.length) { this.globalBody.textContent = 'No scores yet'; return; }
+      this.globalBody.innerHTML = data.map((s, i) => {
+        const c = i === 0 ? '#d4920a' : i < 3 ? '#c0b090' : '#908878';
+        return `<div style="display:flex;justify-content:space-between;padding:1px 4px">` +
+          `<span style="color:${c}">${i + 1}. ${s.name}</span>` +
+          `<span style="color:${c};font-weight:600">${s.score}</span></div>`;
+      }).join('');
     } catch {
-      this.globalEl.textContent = 'Could not load leaderboard';
+      this.globalBody.textContent = 'Could not load leaderboard';
     }
   }
 
