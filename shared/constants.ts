@@ -26,6 +26,8 @@ export const TICK_INTERVAL_MS = 1000 / SERVER_TICK_RATE;
 
 export const RESULTS_DISPLAY_TIME = 10;
 
+export const WEATHER_TYPES = ['day', 'dusk', 'night', 'fog', 'storm'] as const;
+
 export const BOAT_ACCELERATION = 300;
 export const BOAT_REVERSE_ACCELERATION = 150;
 export const BOAT_DRAG = 0.97;

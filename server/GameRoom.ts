@@ -1,6 +1,6 @@
 import { WebSocket } from 'ws';
 import { MessageType, type BoatState, type TrapState, type GatorState, type WorldState, type InputEvent, type Vec2, type NetProjectile } from '../shared/types';
-import { TICK_INTERVAL_MS, TileType, TILE_SIZE, ROUND_DURATION, HOT_ROUND_DURATION, HOT_TRAP_COUNT, HOT_GATOR_COUNT, HOT_TRAP_RESPAWN, RESULTS_DISPLAY_TIME } from '../shared/constants';
+import { TICK_INTERVAL_MS, TileType, TILE_SIZE, ROUND_DURATION, HOT_ROUND_DURATION, HOT_TRAP_COUNT, HOT_GATOR_COUNT, HOT_TRAP_RESPAWN, RESULTS_DISPLAY_TIME, WEATHER_TYPES } from '../shared/constants';
 import { generateMap } from '../shared/MapGenerator';
 import { updateBoatPhysics, resolveBoatCollisions, checkTrapCollection, updateTrapTimers, checkGatorContact, tryFireNet, updateNetProjectiles } from './Physics';
 import { randomWaterPosition, updateGatorPatrolPositions } from './PhysicsHelpers';
@@ -23,10 +23,12 @@ export class GameRoom {
   private roundActive: boolean = true;
   private resultsTimer: number = 0;
   private isHotRound: boolean;
+  private weather: string;
 
   constructor(room: Room, blitz = false) {
     this.room = room;
     this.isHotRound = blitz;
+    this.weather = WEATHER_TYPES[Math.floor(Math.random() * WEATHER_TYPES.length)];
     this.tiles = generateMap();
     this.roundTimer = blitz ? HOT_ROUND_DURATION : ROUND_DURATION;
     this.spawnTraps(blitz ? HOT_TRAP_COUNT : NORM_TRAPS);
@@ -83,6 +85,7 @@ export class GameRoom {
   }
 
   startRound(): void {
+    this.weather = WEATHER_TYPES[Math.floor(Math.random() * WEATHER_TYPES.length)];
     this.roundTimer = this.isHotRound ? HOT_ROUND_DURATION : ROUND_DURATION;
     this.roundActive = true;
     this.netProjectiles.length = 0;
@@ -163,7 +166,7 @@ export class GameRoom {
     updateNetProjectiles(this.netProjectiles, boatArray, this.gators, dt, this.tiles);
     checkTrapCollection(boatArray, this.traps, this.isHotRound ? HOT_TRAP_RESPAWN : undefined);
     updateTrapTimers(this.traps, dt, this.tiles);
-    this.updateGatorPatrols(dt);
+    updateGatorPatrolPositions(this.gators, dt);
     checkGatorContact(boatArray, this.gators);
     this.broadcast(MessageType.STATE);
   }
@@ -178,16 +181,12 @@ export class GameRoom {
     }
   }
 
-  private updateGatorPatrols(dt: number): void {
-    updateGatorPatrolPositions(this.gators, dt);
-  }
-
   private broadcast(type: MessageType): void {
     const worldState: WorldState = {
       boats: Array.from(this.boats.values()), traps: this.traps,
       gators: this.gators, netProjectiles: this.netProjectiles,
       roundTimer: this.roundTimer, roundActive: this.roundActive,
-      isHotRound: this.isHotRound,
+      isHotRound: this.isHotRound, weather: this.weather,
     };
     const message = JSON.stringify({ type, payload: { worldState, tiles: this.tiles } });
     for (const player of this.room.players.values()) {

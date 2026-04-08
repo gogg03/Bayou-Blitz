@@ -20,6 +20,7 @@ export class HUD {
   readonly muteBtn: HTMLButtonElement;
   private timerEl: HTMLDivElement;
   private hotBanner: HTMLDivElement;
+  private weatherEl: HTMLDivElement;
   private scoreEl: HTMLDivElement;
   private cooldownBar: HTMLDivElement;
   private cooldownFill: HTMLDivElement;
@@ -46,6 +47,12 @@ export class HUD {
       textShadow: '0 0 10px rgba(255,68,34,0.6)',
     });
     this.hotBanner.textContent = 'HOT ROUND';
+
+    this.weatherEl = DIV(timerPanel, {
+      fontFamily: FONT, fontSize: '12px', color: TEXT, textAlign: 'center',
+      letterSpacing: '1px', marginTop: '2px', opacity: '0.8',
+    });
+    this.weatherEl.textContent = '';
 
     const bottomLeft = DIV(document.body, {
       position: 'fixed', bottom: '18px', left: '18px', zIndex: '10',
@@ -139,6 +146,15 @@ export class HUD {
 
   setHotRound(isHot: boolean): void {
     this.hotBanner.style.display = isHot ? 'block' : 'none';
+  }
+
+  private static WEATHER_LABELS: Record<string, string> = {
+    day: '\u2600 Clear Day', dusk: '\u{1F305} Dusk', night: '\u{1F319} Night',
+    fog: '\u{1F32B}\uFE0F Dense Fog', storm: '\u26C8\uFE0F Storm',
+  };
+
+  setWeather(weather: string): void {
+    this.weatherEl.textContent = HUD.WEATHER_LABELS[weather] ?? weather;
   }
 
   updateLeaderboard(boats: BoatState[], localId: string): void {

@@ -9,6 +9,9 @@ const AUTO_FOLLOW_LERP = 0.03;
 const RELEASE_RETURN_DELAY = 1500;
 const MINIMAP_SIZE = 200;
 const MINIMAP_PAD = 14;
+const ZOOM_MIN = 150;
+const ZOOM_MAX = 600;
+const ZOOM_SPEED = 0.4;
 
 export class SceneManager {
   readonly renderer: THREE.WebGLRenderer;
@@ -21,6 +24,7 @@ export class SceneManager {
   private userOrbiting = false;
   private orbitReleaseTime = 0;
   private _firstPerson = false;
+  private zoomDist = CAMERA_DISTANCE;
 
   get isFirstPerson(): boolean { return this._firstPerson; }
 
@@ -33,10 +37,10 @@ export class SceneManager {
     container.appendChild(this.renderer.domElement);
 
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.Fog(0x0a1a0d, 800, 1600);
+    this.scene.fog = new THREE.Fog(0x0a1a0d, 1800, 3000);
 
     const aspect = window.innerWidth / window.innerHeight;
-    this.camera = new THREE.PerspectiveCamera(50, aspect, 1, 3000);
+    this.camera = new THREE.PerspectiveCamera(50, aspect, 1, 4000);
     this.camera.position.set(0, Math.sin(CAMERA_ANGLE) * CAMERA_DISTANCE, Math.cos(CAMERA_ANGLE) * CAMERA_DISTANCE);
     this.camera.lookAt(0, 0, 0);
 
@@ -49,9 +53,7 @@ export class SceneManager {
       RIGHT: THREE.MOUSE.ROTATE,
     };
     this.controls.enablePan = false;
-    this.controls.enableZoom = true;
-    this.controls.minDistance = 100;
-    this.controls.maxDistance = 800;
+    this.controls.enableZoom = false;
     this.controls.minPolarAngle = MIN_POLAR;
     this.controls.maxPolarAngle = MAX_POLAR;
     this.controls.enableDamping = true;
@@ -62,6 +64,11 @@ export class SceneManager {
       this.userOrbiting = false;
       this.orbitReleaseTime = performance.now();
     });
+
+    this.renderer.domElement.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      this.zoomDist = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, this.zoomDist + e.deltaY * ZOOM_SPEED));
+    }, { passive: false });
 
     this.setupLighting();
     this.createSwampFloor();
@@ -77,7 +84,7 @@ export class SceneManager {
   }
 
   private createSwampFloor(): void {
-    const geometry = new THREE.PlaneGeometry(3000, 3000);
+    const geometry = new THREE.PlaneGeometry(5000, 5000);
     const material = new THREE.MeshStandardMaterial({ color: 0x2d5a27 });
     const floor = new THREE.Mesh(geometry, material);
     floor.rotation.x = -Math.PI / 2;
@@ -123,6 +130,14 @@ export class SceneManager {
         this.camera.position.clone().sub(this.controls.target)
       );
       spherical.theta += diff * AUTO_FOLLOW_LERP;
+      spherical.radius = this.zoomDist;
+      const newPos = new THREE.Vector3().setFromSpherical(spherical).add(this.controls.target);
+      this.camera.position.copy(newPos);
+    } else {
+      const spherical = new THREE.Spherical().setFromVector3(
+        this.camera.position.clone().sub(this.controls.target)
+      );
+      spherical.radius = this.zoomDist;
       const newPos = new THREE.Vector3().setFromSpherical(spherical).add(this.controls.target);
       this.camera.position.copy(newPos);
     }

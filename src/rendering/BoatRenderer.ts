@@ -27,8 +27,8 @@ export class BoatRenderer {
 
     const rampGeo = new THREE.BoxGeometry(HULL_W, HULL_H * 0.6, RAMP_L);
     const ramp = new THREE.Mesh(rampGeo, hullMat);
-    ramp.position.set(0, HULL_H + 0.8, -(HULL_L / 2 + RAMP_L / 2 - 2));
-    ramp.rotation.x = -0.35;
+    ramp.position.set(0, HULL_H * 0.5 + 0.3, -(HULL_L / 2 + RAMP_L / 2 - 2));
+    ramp.rotation.x = 0.35;
     group.add(ramp);
 
     const railMat = new THREE.MeshStandardMaterial({ color: 0x666666, metalness: 0.6 });

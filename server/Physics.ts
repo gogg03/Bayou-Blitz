@@ -54,17 +54,34 @@ export function updateBoatPhysics(
 
   const nextX = boat.position.x + boat.velocity.x * dt;
   const nextY = boat.position.y + boat.velocity.y * dt;
+  const margin = BOAT_COLLISION_RADIUS * 0.5;
 
-  if (!isSolidTile(nextX, boat.position.y, tiles)) {
+  const blockedX = isSolidTile(nextX, boat.position.y, tiles)
+    || isSolidTile(nextX + margin, boat.position.y, tiles)
+    || isSolidTile(nextX - margin, boat.position.y, tiles);
+
+  if (!blockedX) {
     boat.position.x = nextX;
   } else {
-    boat.velocity.x *= -0.3;
+    boat.velocity.x *= -0.4;
   }
 
-  if (!isSolidTile(boat.position.x, nextY, tiles)) {
+  const blockedY = isSolidTile(boat.position.x, nextY, tiles)
+    || isSolidTile(boat.position.x, nextY + margin, tiles)
+    || isSolidTile(boat.position.x, nextY - margin, tiles);
+
+  if (!blockedY) {
     boat.position.y = nextY;
   } else {
-    boat.velocity.y *= -0.3;
+    boat.velocity.y *= -0.4;
+  }
+
+  if (isSolidTile(boat.position.x, boat.position.y, tiles)) {
+    const pos = randomWaterPosition(tiles);
+    boat.position.x = pos.x;
+    boat.position.y = pos.y;
+    boat.velocity.x = 0;
+    boat.velocity.y = 0;
   }
 }
 

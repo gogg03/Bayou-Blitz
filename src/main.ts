@@ -14,6 +14,7 @@ import { RoundSummary } from './ui/RoundSummary';
 import { AudioManager } from './audio/AudioManager';
 import { ParticleSystem } from './rendering/ParticleSystem';
 import { TreeRenderer } from './rendering/TreeRenderer';
+import { WeatherSystem } from './rendering/WeatherSystem';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001/ws';
 
@@ -32,6 +33,7 @@ const lobby = new LobbyScreen();
 const roundSummary = new RoundSummary();
 const particles = new ParticleSystem(sceneManager.scene);
 const treeRenderer = new TreeRenderer(sceneManager.scene);
+const weather = new WeatherSystem(sceneManager.scene, sceneManager.renderer);
 const audio = new AudioManager();
 const network = new NetworkClient(WS_URL);
 
@@ -119,6 +121,8 @@ function animate(): void {
     netRenderer.updateNets(gameState.worldState.netProjectiles);
     hud.updateTimer(gameState.worldState.roundTimer);
     hud.setHotRound(gameState.worldState.isHotRound);
+    hud.setWeather(gameState.worldState.weather);
+    weather.setWeather(gameState.worldState.weather);
     hud.updateLeaderboard(gameState.worldState.boats, gameState.localPlayerId ?? '');
 
     const localBoat = gameState.worldState.boats.find(b => b.id === gameState.localPlayerId);
@@ -135,7 +139,12 @@ function animate(): void {
     }
   }
 
+  if (gameState.localPlayerId) {
+    const interp = interpolator.getInterpolated(gameState.localPlayerId);
+    if (interp) weather.setFollowTarget(interp.x, interp.y);
+  }
   boatRenderer.spinFans(1 / 60);
+  weather.update(1 / 60);
   particles.update(1 / 60);
   sceneManager.render();
   requestAnimationFrame(animate);

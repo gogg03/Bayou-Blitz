@@ -45,6 +45,7 @@ export interface WorldState {
   roundTimer: number;
   roundActive: boolean;
   isHotRound: boolean;
+  weather: string;
 }
 
 export interface InputEvent {

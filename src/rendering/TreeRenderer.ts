@@ -104,13 +104,13 @@ export class TreeRenderer {
     ctx.clearRect(0, 0, w, h);
     const cx = w / 2;
 
-    const trunkGrad = ctx.createLinearGradient(cx, h * 0.5, cx, h);
+    const trunkGrad = ctx.createLinearGradient(cx, h * 0.3, cx, h);
     trunkGrad.addColorStop(0, '#2a1a0c');
     trunkGrad.addColorStop(1, '#1f1308');
     ctx.fillStyle = trunkGrad;
     ctx.beginPath();
-    ctx.moveTo(cx - 3, h * 0.5);
-    ctx.lineTo(cx + 3, h * 0.5);
+    ctx.moveTo(cx - 2, h * 0.3);
+    ctx.lineTo(cx + 2, h * 0.3);
     ctx.lineTo(cx + 5, h * 0.75);
     ctx.lineTo(cx + 14, h * 0.88);
     ctx.lineTo(cx + 18, h);
@@ -143,6 +143,9 @@ export class TreeRenderer {
       { x: cx + 14, y: h * 0.40, rx: 28, ry: 12, c: mid },
       { x: cx - 30, y: h * 0.25, rx: 18, ry: 10, c: dark },
       { x: cx + 32, y: h * 0.24, rx: 16, ry: 10, c: dark },
+      { x: cx, y: h * 0.46, rx: 24, ry: 12, c: dark },
+      { x: cx - 12, y: h * 0.50, rx: 18, ry: 10, c: mid },
+      { x: cx + 10, y: h * 0.48, rx: 20, ry: 10, c: dark },
     ];
     for (const cl of clusters) {
       ctx.fillStyle = cl.c;
