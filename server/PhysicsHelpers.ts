@@ -99,8 +99,17 @@ export function updateNetProjectiles(
         const dy = gator.position.y - net.position.y;
         if (dx * dx + dy * dy < hitRadiusSq) {
           const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          gator.position.x += (dx / dist) * 80;
-          gator.position.y += (dy / dist) * 80;
+          const pushDist = 250;
+          gator.position.x += (dx / dist) * pushDist;
+          gator.position.y += (dy / dist) * pushDist;
+          gator.patrolPath = [];
+          for (let p = 0; p < 4; p++) {
+            gator.patrolPath.push({
+              x: gator.position.x + (Math.random() - 0.5) * TILE_SIZE * 6,
+              y: gator.position.y + (Math.random() - 0.5) * TILE_SIZE * 6,
+            });
+          }
+          gator.patrolPathIndex = 0;
           hit = true;
           break;
         }

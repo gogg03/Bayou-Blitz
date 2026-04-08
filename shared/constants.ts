@@ -13,7 +13,7 @@ export const GATOR_STUN_DURATION = 1;
 export const NET_RANGE = 250;
 export const NET_SPEED = 180;
 export const NET_HIT_RADIUS = 25;
-export const TRAP_COLLECT_RADIUS = 20;
+export const TRAP_COLLECT_RADIUS = 32;
 export const GATOR_CONTACT_RADIUS = 35;
 export const GATOR_KNOCKBACK_FORCE = 150;
 
