@@ -9,6 +9,7 @@ const FAN_R = 7;
 export class BoatRenderer {
   private scene: THREE.Scene;
   private boatMeshes: Map<string, THREE.Group> = new Map();
+  private fanGroups: Map<string, THREE.Group> = new Map();
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
@@ -62,21 +63,22 @@ export class BoatRenderer {
     cage.position.set(0, HULL_H + 5.5, HULL_L / 2 + 1);
     group.add(cage);
 
+    const fanGroup = new THREE.Group();
+    fanGroup.position.set(0, HULL_H + 5.5, HULL_L / 2 + 1);
     const bladeMat = new THREE.MeshStandardMaterial({
       color: 0x999999, metalness: 0.5, side: THREE.DoubleSide,
     });
     for (let i = 0; i < 3; i++) {
       const blade = new THREE.Mesh(new THREE.PlaneGeometry(2, FAN_R * 1.8), bladeMat);
-      blade.position.set(0, HULL_H + 5.5, HULL_L / 2 + 1);
       blade.rotation.set(0, 0, (Math.PI / 3) * i);
-      group.add(blade);
+      fanGroup.add(blade);
     }
-
-    const hubGeo = new THREE.CylinderGeometry(1.2, 1.2, 1, 8);
-    const hub = new THREE.Mesh(hubGeo, cageMat);
-    hub.position.set(0, HULL_H + 5.5, HULL_L / 2 + 1);
+    const hub = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.2, 1.2, 1, 8), cageMat
+    );
     hub.rotation.x = Math.PI / 2;
-    group.add(hub);
+    fanGroup.add(hub);
+    group.add(fanGroup);
 
     for (const side of [-1, 1]) {
       const strut = new THREE.Mesh(new THREE.BoxGeometry(0.5, 6, 0.5), railMat);
@@ -95,6 +97,7 @@ export class BoatRenderer {
 
     this.scene.add(group);
     this.boatMeshes.set(id, group);
+    this.fanGroups.set(id, fanGroup);
     return group;
   }
 
@@ -124,11 +127,18 @@ export class BoatRenderer {
     group.rotation.y = rotation;
   }
 
+  spinFans(dt: number): void {
+    for (const fan of this.fanGroups.values()) {
+      fan.rotation.z += 12 * dt;
+    }
+  }
+
   removeBoat(id: string): void {
     const group = this.boatMeshes.get(id);
     if (group) {
       this.scene.remove(group);
       this.boatMeshes.delete(id);
+      this.fanGroups.delete(id);
     }
   }
 

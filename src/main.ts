@@ -135,6 +135,7 @@ function animate(): void {
     }
   }
 
+  boatRenderer.spinFans(1 / 60);
   particles.update(1 / 60);
   sceneManager.render();
   requestAnimationFrame(animate);
