@@ -160,7 +160,7 @@ export class GameRoom {
     }
 
     resolveBoatCollisions(boatArray);
-    updateNetProjectiles(this.netProjectiles, boatArray, this.gators, dt);
+    updateNetProjectiles(this.netProjectiles, boatArray, this.gators, dt, this.tiles);
     checkTrapCollection(boatArray, this.traps, this.isHotRound ? HOT_TRAP_RESPAWN : undefined);
     updateTrapTimers(this.traps, dt, this.tiles);
     this.updateGatorPatrols(dt);

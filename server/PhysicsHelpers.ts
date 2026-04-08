@@ -63,7 +63,8 @@ export function updateNetProjectiles(
   nets: NetProjectile[],
   boats: BoatState[],
   gators: GatorState[],
-  dt: number
+  dt: number,
+  tiles?: TileType[][]
 ): void {
   const hitRadiusSq = NET_HIT_RADIUS * NET_HIT_RADIUS;
 
@@ -98,10 +99,15 @@ export function updateNetProjectiles(
         const dx = gator.position.x - net.position.x;
         const dy = gator.position.y - net.position.y;
         if (dx * dx + dy * dy < hitRadiusSq) {
-          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          const pushDist = 250;
-          gator.position.x += (dx / dist) * pushDist;
-          gator.position.y += (dy / dist) * pushDist;
+          if (tiles) {
+            const newPos = randomWaterPosition(tiles);
+            gator.position.x = newPos.x;
+            gator.position.y = newPos.y;
+          } else {
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            gator.position.x += (dx / dist) * 200;
+            gator.position.y += (dy / dist) * 200;
+          }
           gator.patrolPath = [];
           for (let p = 0; p < 4; p++) {
             gator.patrolPath.push({
