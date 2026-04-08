@@ -13,6 +13,7 @@ import { LobbyScreen } from './ui/LobbyScreen';
 import { RoundSummary } from './ui/RoundSummary';
 import { AudioManager } from './audio/AudioManager';
 import { ParticleSystem } from './rendering/ParticleSystem';
+import { TreeRenderer } from './rendering/TreeRenderer';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001/ws';
 
@@ -30,6 +31,7 @@ const hud = new HUD();
 const lobby = new LobbyScreen();
 const roundSummary = new RoundSummary();
 const particles = new ParticleSystem(sceneManager.scene);
+const treeRenderer = new TreeRenderer(sceneManager.scene);
 const audio = new AudioManager();
 const network = new NetworkClient(WS_URL);
 
@@ -56,6 +58,7 @@ network.onRoundStarted(() => {
   lobby.hide();
   roundSummary.hide();
   mapRenderer.clear();
+  treeRenderer.clear();
 });
 
 network.onRoundEnded((scores) => {
@@ -68,6 +71,7 @@ network.onWorldState((worldState, tiles) => {
 
   if (gameState.tiles && !mapRenderer.hasRendered()) {
     mapRenderer.renderMap(gameState.tiles);
+    treeRenderer.placeAlongEdges(gameState.tiles);
   }
 
   const activeIds = new Set<string>();
