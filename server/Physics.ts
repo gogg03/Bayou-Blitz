@@ -104,7 +104,7 @@ export function resolveBoatCollisions(boats: BoatState[]): void {
   }
 }
 
-export function checkTrapCollection(boats: BoatState[], traps: TrapState[]): void {
+export function checkTrapCollection(boats: BoatState[], traps: TrapState[], respawnDelay = TRAP_RESPAWN_DELAY): void {
   for (const boat of boats) {
     for (const trap of traps) {
       if (!trap.isActive) continue;
@@ -112,7 +112,7 @@ export function checkTrapCollection(boats: BoatState[], traps: TrapState[]): voi
       const dy = boat.position.y - trap.position.y;
       if (dx * dx + dy * dy < TRAP_COLLECT_RADIUS * TRAP_COLLECT_RADIUS) {
         trap.isActive = false;
-        trap.respawnTimer = TRAP_RESPAWN_DELAY;
+        trap.respawnTimer = respawnDelay;
         boat.score++;
       }
     }

@@ -1,13 +1,13 @@
 import { WebSocket } from 'ws';
 import { MessageType, type BoatState, type TrapState, type GatorState, type WorldState, type InputEvent, type Vec2, type NetProjectile } from '../shared/types';
-import { TICK_INTERVAL_MS, TileType, TILE_SIZE, ROUND_DURATION, RESULTS_DISPLAY_TIME } from '../shared/constants';
+import { TICK_INTERVAL_MS, TileType, TILE_SIZE, ROUND_DURATION, HOT_ROUND_DURATION, HOT_TRAP_COUNT, HOT_GATOR_COUNT, HOT_TRAP_RESPAWN, RESULTS_DISPLAY_TIME } from '../shared/constants';
 import { generateMap } from '../shared/MapGenerator';
 import { updateBoatPhysics, resolveBoatCollisions, checkTrapCollection, updateTrapTimers, checkGatorContact, tryFireNet, updateNetProjectiles } from './Physics';
 import { randomWaterPosition, updateGatorPatrolPositions } from './PhysicsHelpers';
 import type { Room } from './RoomManager';
 
-const TRAP_COUNT = 15;
-const GATOR_COUNT = 3;
+const NORM_TRAPS = 15;
+const NORM_GATORS = 3;
 
 export class GameRoom {
   private tiles: TileType[][];
@@ -22,17 +22,20 @@ export class GameRoom {
   private roundTimer: number = ROUND_DURATION;
   private roundActive: boolean = true;
   private resultsTimer: number = 0;
+  private roundNumber = 0;
+  private isHotRound = false;
 
   constructor(room: Room) {
     this.room = room;
     this.tiles = generateMap();
-    this.spawnTraps();
-    this.spawnGators();
+    this.spawnTraps(NORM_TRAPS);
+    this.spawnGators(NORM_GATORS);
     this.start();
   }
 
-  private spawnTraps(): void {
-    for (let i = 0; i < TRAP_COUNT; i++) {
+  private spawnTraps(count: number): void {
+    this.traps.length = 0;
+    for (let i = 0; i < count; i++) {
       this.traps.push({
         id: `trap-${i}`,
         position: randomWaterPosition(this.tiles),
@@ -42,8 +45,9 @@ export class GameRoom {
     }
   }
 
-  private spawnGators(): void {
-    for (let i = 0; i < GATOR_COUNT; i++) {
+  private spawnGators(count: number): void {
+    this.gators.length = 0;
+    for (let i = 0; i < count; i++) {
       const center = randomWaterPosition(this.tiles);
       const path: Vec2[] = [];
       for (let p = 0; p < 4; p++) {
@@ -78,15 +82,19 @@ export class GameRoom {
   }
 
   startRound(): void {
-    this.roundTimer = ROUND_DURATION;
+    this.roundNumber++;
+    this.isHotRound = this.roundNumber % 2 === 0;
+    this.roundTimer = this.isHotRound ? HOT_ROUND_DURATION : ROUND_DURATION;
     this.roundActive = true;
     this.netProjectiles.length = 0;
+
+    this.spawnTraps(this.isHotRound ? HOT_TRAP_COUNT : NORM_TRAPS);
+    this.spawnGators(this.isHotRound ? HOT_GATOR_COUNT : NORM_GATORS);
 
     const boatArray = Array.from(this.boats.values());
     for (let i = 0; i < boatArray.length; i++) {
       const boat = boatArray[i];
-      const pos = randomWaterPosition(this.tiles);
-      boat.position = pos;
+      boat.position = randomWaterPosition(this.tiles);
       boat.velocity = { x: 0, y: 0 };
       boat.rotation = (Math.PI * 2 * i) / Math.max(boatArray.length, 1);
       boat.score = 0;
@@ -94,13 +102,6 @@ export class GameRoom {
       boat.stunTimer = 0;
       boat.netCooldown = 0;
     }
-
-    for (const trap of this.traps) {
-      trap.position = randomWaterPosition(this.tiles);
-      trap.isActive = true;
-      trap.respawnTimer = 0;
-    }
-
     this.broadcast(MessageType.ROUND_START);
   }
 
@@ -156,7 +157,7 @@ export class GameRoom {
 
     resolveBoatCollisions(boatArray);
     updateNetProjectiles(this.netProjectiles, boatArray, this.gators, dt);
-    checkTrapCollection(boatArray, this.traps);
+    checkTrapCollection(boatArray, this.traps, this.isHotRound ? HOT_TRAP_RESPAWN : undefined);
     updateTrapTimers(this.traps, dt, this.tiles);
     this.updateGatorPatrols(dt);
     checkGatorContact(boatArray, this.gators);
@@ -182,6 +183,7 @@ export class GameRoom {
       boats: Array.from(this.boats.values()), traps: this.traps,
       gators: this.gators, netProjectiles: this.netProjectiles,
       roundTimer: this.roundTimer, roundActive: this.roundActive,
+      isHotRound: this.isHotRound,
     };
     const message = JSON.stringify({ type, payload: { worldState, tiles: this.tiles } });
     for (const player of this.room.players.values()) {

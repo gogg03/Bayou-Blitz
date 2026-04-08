@@ -44,6 +44,7 @@ export interface WorldState {
   netProjectiles: NetProjectile[];
   roundTimer: number;
   roundActive: boolean;
+  isHotRound: boolean;
 }
 
 export interface InputEvent {

@@ -19,6 +19,7 @@ const SHADOW = '0 2px 8px rgba(0,0,0,0.6)';
 export class HUD {
   readonly muteBtn: HTMLButtonElement;
   private timerEl: HTMLDivElement;
+  private hotBanner: HTMLDivElement;
   private scoreEl: HTMLDivElement;
   private cooldownBar: HTMLDivElement;
   private cooldownFill: HTMLDivElement;
@@ -38,6 +39,13 @@ export class HUD {
       textShadow: '0 0 12px rgba(212,146,10,0.4)',
     });
     this.timerEl.textContent = '3:00';
+
+    this.hotBanner = DIV(timerPanel, {
+      fontFamily: FONT, fontSize: '14px', fontWeight: 'bold', color: '#ff4422',
+      textAlign: 'center', letterSpacing: '3px', display: 'none',
+      textShadow: '0 0 10px rgba(255,68,34,0.6)',
+    });
+    this.hotBanner.textContent = 'HOT ROUND';
 
     const bottomLeft = DIV(document.body, {
       position: 'fixed', bottom: '18px', left: '18px', zIndex: '10',
@@ -127,6 +135,10 @@ export class HUD {
     this.cooldownFill.style.background = ready ? '#4a2' : '#a33';
     this.cooldownLabel.textContent = ready ? 'Net: Ready' : `Net: ${cooldown.toFixed(1)}s`;
     this.cooldownLabel.style.color = ready ? '#6c6' : '#e66';
+  }
+
+  setHotRound(isHot: boolean): void {
+    this.hotBanner.style.display = isHot ? 'block' : 'none';
   }
 
   updateLeaderboard(boats: BoatState[], localId: string): void {

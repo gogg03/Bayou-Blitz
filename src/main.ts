@@ -114,6 +114,7 @@ function animate(): void {
     gatorRenderer.updateGators(gameState.worldState.gators, gameState.tiles ?? undefined);
     netRenderer.updateNets(gameState.worldState.netProjectiles);
     hud.updateTimer(gameState.worldState.roundTimer);
+    hud.setHotRound(gameState.worldState.isHotRound);
     hud.updateLeaderboard(gameState.worldState.boats, gameState.localPlayerId ?? '');
 
     const localBoat = gameState.worldState.boats.find(b => b.id === gameState.localPlayerId);

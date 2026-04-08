@@ -5,6 +5,10 @@ export const MAP_MEDIUM = { cols: 60, rows: 60 };
 export const MAP_LARGE = { cols: 80, rows: 80 };
 
 export const ROUND_DURATION = 180;
+export const HOT_ROUND_DURATION = 60;
+export const HOT_TRAP_COUNT = 25;
+export const HOT_GATOR_COUNT = 6;
+export const HOT_TRAP_RESPAWN = 3;
 export const RESPAWN_DELAY = 3;
 export const TRAP_RESPAWN_DELAY = 10;
 export const NET_COOLDOWN = 3;
