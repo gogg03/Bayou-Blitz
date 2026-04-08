@@ -110,6 +110,8 @@ export class GameRoom {
   }
 
   bufferInput(playerId: string, input: InputEvent): void {
+    const prev = this.inputs.get(playerId);
+    if (prev?.fireNet) input.fireNet = true;
     this.inputs.set(playerId, input);
   }
 
@@ -151,7 +153,10 @@ export class GameRoom {
         playerId: boat.id, throttle: 0, steer: 0, fireNet: false,
       };
       updateBoatPhysics(boat, input, dt, this.tiles);
-      if (input.fireNet) tryFireNet(boat, this.netProjectiles, this.netIdCounter);
+      if (input.fireNet) {
+        tryFireNet(boat, this.netProjectiles, this.netIdCounter);
+        input.fireNet = false;
+      }
     }
 
     resolveBoatCollisions(boatArray);
