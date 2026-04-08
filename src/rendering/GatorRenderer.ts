@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { GatorState } from '../../shared/types';
+import { TILE_SIZE, TileType } from '../../shared/constants';
 
 const BODY_LENGTH = 14;
 const BODY_WIDTH = 5;
@@ -13,7 +14,7 @@ export class GatorRenderer {
     this.scene = scene;
   }
 
-  updateGators(gators: GatorState[]): void {
+  updateGators(gators: GatorState[], tiles?: TileType[][]): void {
     const activeIds = new Set<string>();
 
     for (const gator of gators) {
@@ -24,7 +25,8 @@ export class GatorRenderer {
       }
 
       const group = this.gatorMeshes.get(gator.id)!;
-      group.position.set(gator.position.x, 1.5, gator.position.y);
+      const groundY = this.getGroundY(gator.position.x, gator.position.y, tiles);
+      group.position.set(gator.position.x, groundY + 1.5, gator.position.y);
 
       const target = gator.patrolPath[gator.patrolPathIndex];
       if (target) {
@@ -92,6 +94,17 @@ export class GatorRenderer {
       });
       this.gatorMeshes.delete(id);
     }
+  }
+
+  private getGroundY(wx: number, wz: number, tiles?: TileType[][]): number {
+    if (!tiles || tiles.length === 0) return 0;
+    const rows = tiles.length;
+    const cols = tiles[0].length;
+    const col = Math.floor((wx + (cols * TILE_SIZE) / 2) / TILE_SIZE);
+    const row = Math.floor((wz + (rows * TILE_SIZE) / 2) / TILE_SIZE);
+    if (row < 0 || row >= rows || col < 0 || col >= cols) return 0;
+    const t = tiles[row][col];
+    return (t === TileType.LAND || t === TileType.REED_WALL) ? 2.5 : 0;
   }
 
   clear(): void {

@@ -107,7 +107,7 @@ function animate(): void {
 
   if (gameState.worldState) {
     trapRenderer.updateTraps(gameState.worldState.traps, performance.now() / 1000);
-    gatorRenderer.updateGators(gameState.worldState.gators);
+    gatorRenderer.updateGators(gameState.worldState.gators, gameState.tiles ?? undefined);
     netRenderer.updateNets(gameState.worldState.netProjectiles);
     hud.updateTimer(gameState.worldState.roundTimer);
     hud.updateLeaderboard(gameState.worldState.boats, gameState.localPlayerId ?? '');
