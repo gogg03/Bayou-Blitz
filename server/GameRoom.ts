@@ -22,7 +22,7 @@ export class GameRoom {
   private roundTimer: number = ROUND_DURATION;
   private roundActive: boolean = true;
   private resultsTimer: number = 0;
-  private roundNumber = 0;
+  private roundNumber = 1;
   private isHotRound = false;
 
   constructor(room: Room) {
