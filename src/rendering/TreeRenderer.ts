@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { TILE_SIZE, TileType } from '../../shared/constants';
 
-const TREE_HEIGHT = 28;
-const TREE_WIDTH = 14;
+const TREE_HEIGHT = 36;
+const TREE_WIDTH = 20;
 const TREE_SPACING = 48;
 
 export class TreeRenderer {
@@ -63,7 +63,7 @@ export class TreeRenderer {
     });
 
     const h = TREE_HEIGHT * scale;
-    const w = TREE_WIDTH * scale;
+    const w = TREE_WIDTH * scale * scale * 2;
     const geo = new THREE.PlaneGeometry(w, h);
 
     const p1 = new THREE.Mesh(geo, mat);
@@ -84,45 +84,78 @@ export class TreeRenderer {
     canvas.width = w;
     canvas.height = h;
     const ctx = canvas.getContext('2d')!;
-
     ctx.clearRect(0, 0, w, h);
-
-    ctx.fillStyle = '#3b2510';
-    ctx.fillRect(w / 2 - 4, h * 0.55, 8, h * 0.45);
-
     const cx = w / 2;
-    const grad = ctx.createLinearGradient(cx, h * 0.05, cx, h * 0.6);
-    grad.addColorStop(0, '#1a3d1a');
-    grad.addColorStop(0.5, '#2d5a27');
-    grad.addColorStop(1, '#1f4420');
 
+    // Buttressed trunk base — wide flare tapering up
+    const trunkGrad = ctx.createLinearGradient(cx, h * 0.5, cx, h);
+    trunkGrad.addColorStop(0, '#4a3520');
+    trunkGrad.addColorStop(1, '#3b2a15');
+    ctx.fillStyle = trunkGrad;
     ctx.beginPath();
-    ctx.moveTo(cx, h * 0.02);
-    ctx.lineTo(cx + 8, h * 0.15);
-    ctx.lineTo(cx + 18, h * 0.25);
-    ctx.lineTo(cx + 12, h * 0.28);
-    ctx.lineTo(cx + 24, h * 0.38);
-    ctx.lineTo(cx + 16, h * 0.42);
-    ctx.lineTo(cx + 28, h * 0.52);
-    ctx.lineTo(cx + 10, h * 0.56);
-    ctx.lineTo(cx - 10, h * 0.56);
-    ctx.lineTo(cx - 28, h * 0.52);
-    ctx.lineTo(cx - 16, h * 0.42);
-    ctx.lineTo(cx - 24, h * 0.38);
-    ctx.lineTo(cx - 12, h * 0.28);
-    ctx.lineTo(cx - 18, h * 0.25);
-    ctx.lineTo(cx - 8, h * 0.15);
+    ctx.moveTo(cx - 4, h * 0.5);
+    ctx.lineTo(cx + 4, h * 0.5);
+    ctx.lineTo(cx + 5, h * 0.75);
+    ctx.lineTo(cx + 14, h * 0.88);
+    ctx.lineTo(cx + 18, h);
+    ctx.lineTo(cx - 18, h);
+    ctx.lineTo(cx - 14, h * 0.88);
+    ctx.lineTo(cx - 5, h * 0.75);
     ctx.closePath();
-    ctx.fillStyle = grad;
     ctx.fill();
 
-    ctx.fillStyle = 'rgba(80,90,50,0.4)';
-    for (let i = 0; i < 6; i++) {
-      const mx = cx + (i % 2 === 0 ? 1 : -1) * (10 + i * 3);
-      const my = h * (0.35 + i * 0.03);
+    // Knees (root bumps at base)
+    ctx.fillStyle = '#3b2a15';
+    ctx.beginPath();
+    ctx.ellipse(cx - 22, h * 0.96, 6, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(cx + 20, h * 0.97, 5, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Canopy — sparse, irregular foliage clusters at top
+    const foliageColor = (dark: boolean) =>
+      dark ? '#1b3a1b' : '#2a5423';
+    const clusters = [
+      { x: cx, y: h * 0.06, rx: 22, ry: 12 },
+      { x: cx - 16, y: h * 0.12, rx: 28, ry: 14 },
+      { x: cx + 18, y: h * 0.11, rx: 26, ry: 12 },
+      { x: cx - 8, y: h * 0.20, rx: 34, ry: 16 },
+      { x: cx + 12, y: h * 0.19, rx: 30, ry: 14 },
+      { x: cx, y: h * 0.28, rx: 38, ry: 16 },
+      { x: cx - 22, y: h * 0.31, rx: 24, ry: 12 },
+      { x: cx + 24, y: h * 0.30, rx: 22, ry: 12 },
+      { x: cx - 10, y: h * 0.38, rx: 32, ry: 14 },
+      { x: cx + 14, y: h * 0.40, rx: 28, ry: 12 },
+      { x: cx - 30, y: h * 0.25, rx: 18, ry: 10 },
+      { x: cx + 32, y: h * 0.24, rx: 16, ry: 10 },
+    ];
+    for (let i = 0; i < clusters.length; i++) {
+      const c = clusters[i];
+      ctx.fillStyle = foliageColor(i % 2 === 0);
       ctx.beginPath();
-      ctx.ellipse(mx, my, 12, 2, (i % 2) * 0.3, 0, Math.PI * 2);
+      ctx.ellipse(c.x, c.y, c.rx, c.ry, 0, 0, Math.PI * 2);
       ctx.fill();
+    }
+
+    // Spanish moss — thin wisps hanging from branches
+    ctx.strokeStyle = 'rgba(140,160,120,0.5)';
+    ctx.lineWidth = 1.5;
+    const mossDrapes = [
+      [cx - 30, h * 0.24, cx - 36, h * 0.40],
+      [cx + 32, h * 0.22, cx + 38, h * 0.38],
+      [cx - 18, h * 0.34, cx - 24, h * 0.48],
+      [cx + 20, h * 0.36, cx + 26, h * 0.50],
+      [cx - 36, h * 0.30, cx - 42, h * 0.44],
+      [cx + 8, h * 0.42, cx + 6, h * 0.52],
+      [cx - 6, h * 0.40, cx - 10, h * 0.52],
+      [cx + 36, h * 0.28, cx + 40, h * 0.42],
+    ];
+    for (const [x1, y1, x2, y2] of mossDrapes) {
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.quadraticCurveTo(x1 + (x2 - x1) * 0.3, (y1 + y2) / 2 + 4, x2, y2);
+      ctx.stroke();
     }
 
     const tex = new THREE.CanvasTexture(canvas);
