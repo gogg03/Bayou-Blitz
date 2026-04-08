@@ -83,7 +83,7 @@ network.onWorldState((worldState, tiles) => {
     activeIds.add(boat.id);
     if (!knownBoats.has(boat.id)) {
       const isLocal = boat.id === gameState.localPlayerId;
-      boatRenderer.createBoat(boat.id, isLocal ? 0xcc4422 : 0x2266aa, boat.name);
+      boatRenderer.createBoat(boat.id, isLocal ? 0xb0b0b0 : 0x8899aa, boat.name);
       knownBoats.add(boat.id);
     }
   }

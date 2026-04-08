@@ -1,9 +1,10 @@
 import * as THREE from 'three';
 
-const BOAT_LENGTH = 24;
-const BOAT_WIDTH = 12;
-const BOAT_HEIGHT = 4;
-const BOW_LENGTH = 10;
+const HULL_L = 26;
+const HULL_W = 14;
+const HULL_H = 2;
+const RAMP_L = 8;
+const FAN_R = 7;
 
 export class BoatRenderer {
   private scene: THREE.Scene;
@@ -13,31 +14,82 @@ export class BoatRenderer {
     this.scene = scene;
   }
 
-  createBoat(id: string, color: number = 0xcc4422, name?: string): THREE.Group {
+  createBoat(id: string, color: number = 0xb0b0b0, name?: string): THREE.Group {
     const group = new THREE.Group();
+    const cDark = new THREE.Color(color).multiplyScalar(0.7);
 
-    const hullGeo = new THREE.BoxGeometry(BOAT_WIDTH, BOAT_HEIGHT, BOAT_LENGTH);
+    const hullGeo = new THREE.BoxGeometry(HULL_W, HULL_H, HULL_L);
     const hullMat = new THREE.MeshStandardMaterial({ color });
     const hull = new THREE.Mesh(hullGeo, hullMat);
-    hull.position.y = BOAT_HEIGHT / 2 + 0.5;
+    hull.position.y = HULL_H / 2 + 0.3;
     group.add(hull);
 
-    const bowGeo = new THREE.ConeGeometry(BOAT_WIDTH / 2, BOW_LENGTH, 4);
-    const bowMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee });
-    const bow = new THREE.Mesh(bowGeo, bowMat);
-    bow.rotation.x = Math.PI / 2;
-    bow.position.set(0, BOAT_HEIGHT / 2 + 0.5, -(BOAT_LENGTH / 2 + BOW_LENGTH / 2));
-    group.add(bow);
+    const rampGeo = new THREE.BoxGeometry(HULL_W, HULL_H * 0.6, RAMP_L);
+    const ramp = new THREE.Mesh(rampGeo, hullMat);
+    ramp.position.set(0, HULL_H + 0.8, -(HULL_L / 2 + RAMP_L / 2 - 2));
+    ramp.rotation.x = -0.35;
+    group.add(ramp);
 
-    const fanGeo = new THREE.CylinderGeometry(5, 5, 1, 8);
-    const fanMat = new THREE.MeshStandardMaterial({ color: 0x888888 });
-    const fan = new THREE.Mesh(fanGeo, fanMat);
-    fan.position.set(0, BOAT_HEIGHT + 2, BOAT_LENGTH / 2 - 2);
-    group.add(fan);
+    const railMat = new THREE.MeshStandardMaterial({ color: 0x666666, metalness: 0.6 });
+    for (const side of [-1, 1]) {
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(0.5, 2, HULL_L * 0.7), railMat);
+      rail.position.set(side * (HULL_W / 2 - 0.5), HULL_H + 1.3, -2);
+      group.add(rail);
+    }
+
+    const platGeo = new THREE.BoxGeometry(HULL_W * 0.7, 0.8, 8);
+    const platMat = new THREE.MeshStandardMaterial({ color: cDark });
+    const plat = new THREE.Mesh(platGeo, platMat);
+    plat.position.set(0, HULL_H + 2.2, HULL_L / 2 - 6);
+    group.add(plat);
+
+    const seatBase = new THREE.Mesh(
+      new THREE.BoxGeometry(3, 2.5, 3),
+      new THREE.MeshStandardMaterial({ color: 0x333333 })
+    );
+    seatBase.position.set(0, HULL_H + 3.8, HULL_L / 2 - 6);
+    group.add(seatBase);
+    const seatBack = new THREE.Mesh(
+      new THREE.BoxGeometry(3, 3, 0.6),
+      new THREE.MeshStandardMaterial({ color: 0x333333 })
+    );
+    seatBack.position.set(0, HULL_H + 5.5, HULL_L / 2 - 4.5);
+    group.add(seatBack);
+
+    const cageGeo = new THREE.TorusGeometry(FAN_R, 0.4, 8, 24);
+    const cageMat = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.7 });
+    const cage = new THREE.Mesh(cageGeo, cageMat);
+    cage.position.set(0, HULL_H + 5.5, HULL_L / 2 + 1);
+    group.add(cage);
+
+    const bladeMat = new THREE.MeshStandardMaterial({
+      color: 0x999999, metalness: 0.5, side: THREE.DoubleSide,
+    });
+    for (let i = 0; i < 3; i++) {
+      const blade = new THREE.Mesh(new THREE.PlaneGeometry(2, FAN_R * 1.8), bladeMat);
+      blade.position.set(0, HULL_H + 5.5, HULL_L / 2 + 1);
+      blade.rotation.set(0, 0, (Math.PI / 3) * i);
+      group.add(blade);
+    }
+
+    const hubGeo = new THREE.CylinderGeometry(1.2, 1.2, 1, 8);
+    const hub = new THREE.Mesh(hubGeo, cageMat);
+    hub.position.set(0, HULL_H + 5.5, HULL_L / 2 + 1);
+    hub.rotation.x = Math.PI / 2;
+    group.add(hub);
+
+    for (const side of [-1, 1]) {
+      const strut = new THREE.Mesh(new THREE.BoxGeometry(0.5, 6, 0.5), railMat);
+      strut.position.set(side * 4, HULL_H + 3, HULL_L / 2);
+      group.add(strut);
+    }
+    const crossbar = new THREE.Mesh(new THREE.BoxGeometry(8, 0.5, 0.5), railMat);
+    crossbar.position.set(0, HULL_H + 6.2, HULL_L / 2);
+    group.add(crossbar);
 
     if (name) {
       const label = this.createLabel(name);
-      label.position.set(0, BOAT_HEIGHT + 12, 0);
+      label.position.set(0, HULL_H + 16, 0);
       group.add(label);
     }
 
@@ -50,14 +102,14 @@ export class BoatRenderer {
     const canvas = document.createElement('canvas');
     canvas.width = 256;
     canvas.height = 64;
-    const ctx2d = canvas.getContext('2d')!;
-    ctx2d.font = 'bold 32px Arial';
-    ctx2d.textAlign = 'center';
-    ctx2d.fillStyle = '#ffffff';
-    ctx2d.strokeStyle = '#000000';
-    ctx2d.lineWidth = 4;
-    ctx2d.strokeText(text, 128, 40);
-    ctx2d.fillText(text, 128, 40);
+    const ctx = canvas.getContext('2d')!;
+    ctx.font = 'bold 32px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 4;
+    ctx.strokeText(text, 128, 40);
+    ctx.fillText(text, 128, 40);
     const texture = new THREE.CanvasTexture(canvas);
     const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
     const sprite = new THREE.Sprite(mat);
