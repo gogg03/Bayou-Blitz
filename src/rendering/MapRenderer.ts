@@ -69,7 +69,7 @@ export class MapRenderer {
     offsetX: number, offsetZ: number
   ): void {
     const bumperGeos: THREE.BufferGeometry[] = [];
-    const h = 4;
+    const h = 1.5;
     const thickness = 1.5;
     const dirs = [[0, -1], [0, 1], [-1, 0], [1, 0]];
 
@@ -113,7 +113,7 @@ export class MapRenderer {
         return 0.2;
       case TileType.LAND:
       case TileType.REED_WALL:
-        return 0.1;
+        return 2.5;
       case TileType.GATOR_ZONE:
         return -0.05;
       default:
