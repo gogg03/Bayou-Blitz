@@ -18,12 +18,12 @@ export class NetworkClient {
     this.url = url;
   }
 
-  connect(name: string): void {
+  connect(name: string, mode = 'normal'): void {
     this.ws = new WebSocket(this.url);
 
     this.ws.onopen = () => {
       console.log('[Net] Connected');
-      this.send({ type: MessageType.JOIN, payload: { name } });
+      this.send({ type: MessageType.JOIN, payload: { name, mode } });
     };
 
     this.ws.onmessage = (event) => {

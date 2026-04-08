@@ -34,13 +34,14 @@ wss.on('connection', (ws: WebSocket) => {
       const message: WsMessage = JSON.parse(data.toString());
 
       if (message.type === MessageType.JOIN) {
-        const payload = message.payload as { name?: string };
+        const payload = message.payload as { name?: string; mode?: string };
         const player = roomManager.addPlayer(ws, payload.name ?? '');
         wsToPlayer.set(ws, player);
 
         if (!gameRooms.has(player.roomId)) {
           const room = roomManager.getRoom(player.roomId)!;
-          gameRooms.set(player.roomId, new GameRoom(room));
+          const isBlitz = payload.mode === 'blitz';
+          gameRooms.set(player.roomId, new GameRoom(room, isBlitz));
         }
         gameRooms.get(player.roomId)!.addBoat(player.id, player.name);
         return;

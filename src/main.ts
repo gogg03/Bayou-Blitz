@@ -44,8 +44,8 @@ hud.muteBtn.addEventListener('click', () => {
   hud.muteBtn.textContent = muted ? 'Unmute' : 'Mute';
 });
 
-lobby.onJoinGame((name) => {
-  network.connect(name);
+lobby.onJoinGame((name, mode) => {
+  network.connect(name, mode);
 });
 
 network.onAssigned((playerId, roomId) => {

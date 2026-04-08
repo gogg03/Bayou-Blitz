@@ -3,7 +3,9 @@ export class LobbyScreen {
   private nameInput: HTMLInputElement;
   private joinBtn: HTMLButtonElement;
   private statusEl: HTMLDivElement;
-  private onJoin: ((name: string) => void) | null = null;
+  private mode: 'normal' | 'blitz' = 'normal';
+  private modeBtn: HTMLButtonElement;
+  private onJoin: ((name: string, mode: string) => void) | null = null;
 
   constructor() {
     this.overlay = document.createElement('div');
@@ -77,6 +79,21 @@ export class LobbyScreen {
       if (e.key === 'Enter') this.submit();
     });
     panel.appendChild(this.nameInput);
+
+    this.modeBtn = document.createElement('button');
+    this.modeBtn.textContent = 'MODE: NORMAL';
+    Object.assign(this.modeBtn.style, {
+      padding: '8px 24px', fontSize: '13px', fontWeight: '700',
+      borderRadius: '8px', border: '1px solid rgba(196,127,8,0.4)', cursor: 'pointer',
+      background: 'rgba(19,46,23,0.8)', color: '#c47f08', letterSpacing: '2px',
+      marginBottom: '14px', transition: 'background 0.2s',
+    });
+    this.modeBtn.addEventListener('click', () => {
+      this.mode = this.mode === 'normal' ? 'blitz' : 'normal';
+      this.modeBtn.textContent = this.mode === 'blitz' ? 'MODE: BLITZ' : 'MODE: NORMAL';
+      this.modeBtn.style.background = this.mode === 'blitz' ? 'rgba(120,30,10,0.6)' : 'rgba(19,46,23,0.8)';
+    });
+    panel.appendChild(this.modeBtn);
 
     this.joinBtn = document.createElement('button');
     this.joinBtn.textContent = 'LAUNCH BOAT';
@@ -162,10 +179,10 @@ export class LobbyScreen {
     this.joinBtn.style.opacity = '0.6';
     this.joinBtn.style.cursor = 'default';
     this.statusEl.textContent = 'Connecting...';
-    this.onJoin?.(name);
+    this.onJoin?.(name, this.mode);
   }
 
-  onJoinGame(callback: (name: string) => void): void {
+  onJoinGame(callback: (name: string, mode: string) => void): void {
     this.onJoin = callback;
   }
 

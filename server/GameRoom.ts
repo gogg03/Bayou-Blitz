@@ -22,14 +22,15 @@ export class GameRoom {
   private roundTimer: number = ROUND_DURATION;
   private roundActive: boolean = true;
   private resultsTimer: number = 0;
-  private roundNumber = 1;
-  private isHotRound = false;
+  private isHotRound: boolean;
 
-  constructor(room: Room) {
+  constructor(room: Room, blitz = false) {
     this.room = room;
+    this.isHotRound = blitz;
     this.tiles = generateMap();
-    this.spawnTraps(NORM_TRAPS);
-    this.spawnGators(NORM_GATORS);
+    this.roundTimer = blitz ? HOT_ROUND_DURATION : ROUND_DURATION;
+    this.spawnTraps(blitz ? HOT_TRAP_COUNT : NORM_TRAPS);
+    this.spawnGators(blitz ? HOT_GATOR_COUNT : NORM_GATORS);
     this.start();
   }
 
@@ -82,8 +83,6 @@ export class GameRoom {
   }
 
   startRound(): void {
-    this.roundNumber++;
-    this.isHotRound = this.roundNumber % 2 === 0;
     this.roundTimer = this.isHotRound ? HOT_ROUND_DURATION : ROUND_DURATION;
     this.roundActive = true;
     this.netProjectiles.length = 0;
