@@ -7,22 +7,29 @@ const MIN_POLAR = Math.PI / 8;
 const MAX_POLAR = Math.PI / 2.5;
 const AUTO_FOLLOW_LERP = 0.03;
 const RELEASE_RETURN_DELAY = 1500;
+const MINIMAP_SIZE = 200;
+const MINIMAP_PAD = 14;
 
 export class SceneManager {
   readonly renderer: THREE.WebGLRenderer;
   readonly scene: THREE.Scene;
   readonly camera: THREE.PerspectiveCamera;
+  private fpCamera: THREE.PerspectiveCamera;
   private controls: OrbitControls;
   private followTarget: { x: number; z: number } | null = null;
   private followRotation: number = 0;
   private userOrbiting = false;
   private orbitReleaseTime = 0;
+  private _firstPerson = false;
+
+  get isFirstPerson(): boolean { return this._firstPerson; }
 
   constructor(container: HTMLElement) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setClearColor(0x0a1a0d);
+    this.renderer.autoClear = false;
     container.appendChild(this.renderer.domElement);
 
     this.scene = new THREE.Scene();
@@ -32,6 +39,8 @@ export class SceneManager {
     this.camera = new THREE.PerspectiveCamera(50, aspect, 1, 3000);
     this.camera.position.set(0, Math.sin(CAMERA_ANGLE) * CAMERA_DISTANCE, Math.cos(CAMERA_ANGLE) * CAMERA_DISTANCE);
     this.camera.lookAt(0, 0, 0);
+
+    this.fpCamera = new THREE.PerspectiveCamera(75, aspect, 0.5, 2000);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.mouseButtons = {
@@ -77,9 +86,17 @@ export class SceneManager {
   }
 
   private onResize(): void {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
+    const aspect = window.innerWidth / window.innerHeight;
+    this.camera.aspect = aspect;
     this.camera.updateProjectionMatrix();
+    this.fpCamera.aspect = aspect;
+    this.fpCamera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  toggleView(): void {
+    this._firstPerson = !this._firstPerson;
+    this.controls.enabled = !this._firstPerson;
   }
 
   setFollowTarget(x: number, z: number): void {
@@ -90,7 +107,7 @@ export class SceneManager {
     this.followRotation = rotation;
   }
 
-  update(): void {
+  private updateOverhead(): void {
     if (this.followTarget) {
       this.controls.target.set(this.followTarget.x, 0, this.followTarget.z);
     }
@@ -113,8 +130,40 @@ export class SceneManager {
     this.controls.update();
   }
 
+  private updateFP(): void {
+    if (!this.followTarget) return;
+    const fwd = new THREE.Vector3(
+      -Math.sin(this.followRotation), 0, -Math.cos(this.followRotation)
+    );
+    this.fpCamera.position.set(this.followTarget.x, 4, this.followTarget.z);
+    const lookAt = new THREE.Vector3().copy(this.fpCamera.position)
+      .add(fwd.multiplyScalar(100));
+    this.fpCamera.lookAt(lookAt);
+  }
+
   render(): void {
-    this.update();
-    this.renderer.render(this.scene, this.camera);
+    this.updateOverhead();
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+
+    this.renderer.clear();
+
+    if (this._firstPerson) {
+      this.updateFP();
+      this.renderer.setViewport(0, 0, w, h);
+      this.renderer.setScissor(0, 0, w, h);
+      this.renderer.setScissorTest(false);
+      this.renderer.render(this.scene, this.fpCamera);
+
+      this.renderer.setScissorTest(true);
+      this.renderer.setViewport(w - MINIMAP_SIZE - MINIMAP_PAD, MINIMAP_PAD, MINIMAP_SIZE, MINIMAP_SIZE);
+      this.renderer.setScissor(w - MINIMAP_SIZE - MINIMAP_PAD, MINIMAP_PAD, MINIMAP_SIZE, MINIMAP_SIZE);
+      this.renderer.render(this.scene, this.camera);
+      this.renderer.setScissorTest(false);
+      this.renderer.setViewport(0, 0, w, h);
+    } else {
+      this.renderer.setViewport(0, 0, w, h);
+      this.renderer.render(this.scene, this.camera);
+    }
   }
 }

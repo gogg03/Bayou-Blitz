@@ -38,6 +38,10 @@ const network = new NetworkClient(WS_URL);
 const knownBoats = new Set<string>();
 let prevStunned = false;
 
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'v' || e.key === 'V') sceneManager.toggleView();
+});
+
 hud.muteBtn.addEventListener('click', () => {
   audio.init();
   const muted = audio.toggleMute();
