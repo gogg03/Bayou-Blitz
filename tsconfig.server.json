@@ -4,15 +4,15 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": ["ES2020"],
-    "types": ["node"],
+    "outDir": "dist-server",
+    "rootDir": ".",
     "strict": true,
-    "esModuleInterop": true,
     "skipLibCheck": true,
-    "noEmit": true,
     "isolatedModules": true,
-    "paths": {
-      "@shared/*": ["./shared/*"]
-    }
+    "esModuleInterop": true,
+    "declaration": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
   },
   "include": ["server", "shared"]
 }
