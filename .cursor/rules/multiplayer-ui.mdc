@@ -1,0 +1,97 @@
+---
+description: Multiplayer UI agent — full project context for implementing and upgrading multiplayer UI features in Bayou Blitz
+globs: src/ui/**,src/network/**,src/main.ts,server/RoomManager.ts,server/GameRoom.ts,server/index.ts,shared/types.ts
+alwaysApply: false
+---
+
+# Bayou Blitz — Multiplayer UI Agent
+
+## Project Overview
+Bayou Blitz is a multiplayer airboat arena game. Players navigate a procedural swamp, collect crawfish traps, dodge gators, and net each other. The game is live at **https://gogg.cloud**.
+
+## Architecture
+
+### Networking Model
+- **Authoritative server** at 20Hz tick rate. Client sends `INPUT`, server processes physics, broadcasts `STATE`.
+- WebSocket at `/ws`, REST API at `/api` (leaderboard scores).
+- `RoomManager` handles rooms (max 12 players each), auto-creates/destroys rooms.
+- `GameRoom` runs the game loop per room, tracks round timer, weather, game mode.
+
+### Message Flow (shared/types.ts → MessageType enum)
+| Message | Direction | Payload |
+|---------|-----------|---------|
+| `JOIN` | Client→Server | `{ name, mode }` |
+| `ASSIGN_ID` | Server→Client | `{ playerId, roomId }` |
+| `INPUT` | Client→Server | `{ throttle, steer, fireNet }` |
+| `STATE` | Server→Client | `{ worldState, tiles }` — 20x/sec |
+| `ROUND_START` | Server→Client | `{ worldState, tiles }` |
+| `ROUND_END` | Server→Client | `{ scores[] }` |
+| `PLAYER_JOINED` | Server→Client | `{ playerId, name, playerCount }` |
+| `PLAYER_LEFT` | Server→Client | `{ playerId, playerCount }` |
+
+### WorldState (sent every tick)
+```typescript
+interface WorldState {
+  boats: BoatState[];    // id, position, velocity, rotation, score, isStunned, stunTimer, netCooldown, name
+  traps: TrapState[];    // id, position, isActive, respawnTimer
+  gators: GatorState[];  // id, position, patrolPath
+  netProjectiles: NetProjectile[];
+  roundTimer: number;
+  roundActive: boolean;
+  isHotRound: boolean;
+  weather: string;       // 'day' | 'dusk' | 'night' | 'fog' | 'storm'
+}
+```
+
+### Game Modes
+- **Normal**: 3 min rounds, 15 traps, 3 gators
+- **Blitz**: 1 min rounds, 25 traps, 6 gators, 3s trap respawn
+
+## Current UI Components
+
+### src/ui/LobbyScreen.ts
+Full-screen overlay before joining. Bayou themed (dark green, amber accents). Has: title, tagline, name input, mode toggle (Normal/Blitz), "LAUNCH BOAT" button, status text, controls hint.
+- **API**: `onJoinGame(cb)`, `updateStatus(text)`, `hide()`, `show()`
+
+### src/ui/HUD.ts
+In-game overlay. Timer (top-center), score (bottom-left), net cooldown bar, leaderboard (top-right), mute button (bottom-right), controls hint (fades after 10s), hot round banner, weather indicator.
+- **API**: `updateTimer(s)`, `updateScore(n)`, `updateCooldown(cd)`, `updateLeaderboard(boats, localId)`, `setHotRound(bool)`, `setWeather(str)`, `muteBtn` element
+
+### src/ui/RoundSummary.ts
+Post-round overlay. Shows round rankings (crown/medals for top 3, local player highlighted), global all-time leaderboard (fetched from /api/scores), countdown to next round.
+- **API**: `show(scores, localId)`, `hide()`
+
+### src/network/NetworkClient.ts
+WebSocket client. Connects with name+mode, receives state/round events.
+- **API**: `connect(name, mode)`, `sendInput(input)`, `onWorldState(cb)`, `onAssigned(cb)`, `onRoundStarted(cb)`, `onRoundEnded(cb)`, `disconnect()`
+- Note: `PLAYER_JOINED` and `PLAYER_LEFT` messages are sent by server but **not yet handled** on the client.
+
+### src/main.ts
+Orchestrator. Creates all renderers, UI, network. Wires callbacks. Runs `animate()` loop at 60fps.
+
+## Coding Rules (MUST FOLLOW)
+1. **Files under 200 lines** — split into helpers/new files if needed.
+2. **`shared/types.ts`** — only modify with explicit user approval.
+3. **No hardcoded values** that belong in `shared/constants.ts`.
+4. **UI is vanilla DOM** — no React/frameworks. Inline styles via `Object.assign(el.style, {...})`.
+5. **Theme**: Dark swamp green (`#0a1a0d`), amber accents (`#d4920a`), off-white text (`#e0d8c8`), monospace or Segoe UI fonts.
+6. **TypeScript strict mode** — run `npx tsc --noEmit` after changes.
+7. **Server changes require restart**: kill process on port 3001, then `npx tsx server/index.ts`.
+
+## Deployment
+- **Live at**: https://gogg.cloud (Hostinger VPS 76.13.99.190)
+- **Redeploy**: `ssh root@76.13.99.190 "cd /opt/Bayou-Blitz && git pull && npm install && npm run build && systemctl restart bayou-blitz"`
+- Frontend served by nginx from `/opt/Bayou-Blitz/dist`
+- Backend is systemd service `bayou-blitz`
+
+## What Needs Multiplayer UI Work
+- **Player join/leave notifications** — PLAYER_JOINED/PLAYER_LEFT messages exist server-side but client doesn't display them
+- **Player count** in lobby or HUD
+- **Chat system** — no chat exists yet
+- **Room browser or room codes** — currently auto-assigns to first available room
+- **Spectator mode** — no spectating
+- **Kill feed / event log** — stuns, net hits, gator attacks not shown
+- **Ping/latency indicator** — no connection quality display
+- **Player list panel** — no way to see who's in your room
+- **Ready-up system** — rounds auto-start, no ready check
+- **Reconnection handling** — no reconnect on disconnect
