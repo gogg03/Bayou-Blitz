@@ -27,7 +27,14 @@ app.get('/api/health', (_req, res) => {
 app.use('/api', scoresRouter);
 
 const httpServer = createServer(app);
-const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+const wss = new WebSocketServer({
+  server: httpServer,
+  path: '/ws',
+  perMessageDeflate: {
+    zlibDeflateOptions: { level: 1 },
+    threshold: 256,
+  },
+});
 const roomManager = new RoomManager();
 const gameRooms = new Map<string, GameRoom>();
 
@@ -42,7 +49,17 @@ wss.on('connection', (ws: WebSocket) => {
 
       if (message.type === MessageType.JOIN) {
         const payload = message.payload as { name?: string; mode?: string };
-        const player = roomManager.addPlayer(ws, payload.name ?? '');
+        const name = (payload.name ?? '').trim() || 'Player';
+
+        if (roomManager.isNameTakenInTargetRoom(name)) {
+          ws.send(JSON.stringify({
+            type: MessageType.NAME_TAKEN,
+            payload: { name },
+          }));
+          return;
+        }
+
+        const player = roomManager.addPlayer(ws, name);
         wsToPlayer.set(ws, player);
 
         if (!gameRooms.has(player.roomId)) {

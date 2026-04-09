@@ -82,6 +82,15 @@ export class GameRoom {
       name,
     };
     this.boats.set(playerId, boat);
+
+    const player = this.room.players.get(playerId);
+    if (player?.ws.readyState === WebSocket.OPEN) {
+      const worldState = this.buildWorldState();
+      player.ws.send(JSON.stringify({
+        type: MessageType.STATE,
+        payload: { worldState, tiles: this.tiles },
+      }));
+    }
   }
 
   startRound(): void {
@@ -181,14 +190,22 @@ export class GameRoom {
     }
   }
 
-  private broadcast(type: MessageType): void {
-    const worldState: WorldState = {
+  private buildWorldState(): WorldState {
+    return {
       boats: Array.from(this.boats.values()), traps: this.traps,
       gators: this.gators, netProjectiles: this.netProjectiles,
       roundTimer: this.roundTimer, roundActive: this.roundActive,
       isHotRound: this.isHotRound, weather: this.weather,
     };
-    const message = JSON.stringify({ type, payload: { worldState, tiles: this.tiles } });
+  }
+
+  private broadcast(type: MessageType): void {
+    const worldState = this.buildWorldState();
+    const includeTiles = type === MessageType.ROUND_START;
+    const payload = includeTiles
+      ? { worldState, tiles: this.tiles }
+      : { worldState };
+    const message = JSON.stringify({ type, payload });
     for (const player of this.room.players.values()) {
       if (player.ws.readyState === WebSocket.OPEN) {
         player.ws.send(message);

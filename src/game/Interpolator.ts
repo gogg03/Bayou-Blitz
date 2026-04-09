@@ -1,6 +1,8 @@
 import type { BoatState } from '../../shared/types';
 import { TICK_INTERVAL_MS } from '../../shared/constants';
 
+const MAX_EXTRAPOLATION = 1.5;
+
 interface BoatSnapshot {
   x: number;
   y: number;
@@ -11,8 +13,15 @@ export class Interpolator {
   private previous: Map<string, BoatSnapshot> = new Map();
   private current: Map<string, BoatSnapshot> = new Map();
   private lastUpdateTime = 0;
+  private avgTickInterval = TICK_INTERVAL_MS;
 
   update(boats: BoatState[]): void {
+    const now = performance.now();
+    if (this.lastUpdateTime > 0) {
+      const delta = now - this.lastUpdateTime;
+      this.avgTickInterval = this.avgTickInterval * 0.8 + delta * 0.2;
+    }
+
     for (const [id, snap] of this.current) {
       this.previous.set(id, { ...snap });
     }
@@ -42,7 +51,7 @@ export class Interpolator {
       this.previous.delete(id);
     }
 
-    this.lastUpdateTime = performance.now();
+    this.lastUpdateTime = now;
   }
 
   getInterpolated(boatId: string): BoatSnapshot | null {
@@ -51,12 +60,12 @@ export class Interpolator {
     if (!prev || !curr) return curr ?? null;
 
     const elapsed = performance.now() - this.lastUpdateTime;
-    const t = Math.min(elapsed / TICK_INTERVAL_MS, 1);
+    const t = Math.min(elapsed / this.avgTickInterval, MAX_EXTRAPOLATION);
 
     return {
       x: prev.x + (curr.x - prev.x) * t,
       y: prev.y + (curr.y - prev.y) * t,
-      rotation: lerpAngle(prev.rotation, curr.rotation, t),
+      rotation: lerpAngle(prev.rotation, curr.rotation, Math.min(t, 1)),
     };
   }
 }

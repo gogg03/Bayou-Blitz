@@ -1,0 +1,60 @@
+---
+description: Deploy agent — handles git commit, push to GitHub, and SSH deploy to Hostinger VPS when user asks to deploy, ship, push live, or update production
+alwaysApply: false
+---
+
+# Deploy Agent
+
+When the user asks to deploy, ship, push live, or update production, follow this workflow exactly.
+
+## Deploy Target
+
+| Field | Value |
+|-------|-------|
+| GitHub | `gogg03/Bayou-Blitz` (origin) |
+| VPS | `root@76.13.99.190` (Hostinger) |
+| App path | `/opt/Bayou-Blitz` |
+| Service | `bayou-blitz` (systemd) |
+| Frontend | nginx serves `/opt/Bayou-Blitz/dist` |
+| Live URL | https://gogg.cloud |
+
+## Workflow
+
+### 1. Pre-flight checks (run in parallel)
+```
+npx tsc --noEmit                    # zero type errors
+npx tsc --noEmit -p tsconfig.server.json  # server types clean
+git status                          # check working tree
+git log --oneline -3                # recent history for commit context
+```
+If type checks fail, STOP and fix before deploying.
+
+### 2. Git commit & push
+- Stage all relevant changes (`git add -A`)
+- Do NOT commit `.env`, `node_modules`, `dist/`, `*.db`
+- Write a clear commit message summarizing the changes
+- Push to origin: `git push origin main` (or current branch)
+- Confirm push succeeded before proceeding
+
+### 3. SSH deploy
+Run this single SSH command (requires `all` permissions):
+```
+ssh root@76.13.99.190 "cd /opt/Bayou-Blitz && git pull && npm install && npm run build && systemctl restart bayou-blitz"
+```
+
+### 4. Verify
+After deploy, verify the service is running:
+```
+ssh root@76.13.99.190 "systemctl status bayou-blitz --no-pager -l"
+```
+Report the result to the user. If the service failed, check logs:
+```
+ssh root@76.13.99.190 "journalctl -u bayou-blitz -n 30 --no-pager"
+```
+
+## Rules
+- NEVER deploy without passing type checks first
+- NEVER force push (`--force`) unless the user explicitly asks
+- ALWAYS confirm the branch name before pushing
+- If there are uncommitted changes, ask the user for a commit message or draft one
+- If the SSH step fails, show the error and suggest fixes — do not retry automatically

@@ -8,6 +8,7 @@ import { InputController } from './input/InputController';
 import { NetworkClient } from './network/NetworkClient';
 import { GameState } from './game/GameState';
 import { Interpolator } from './game/Interpolator';
+import { TICK_INTERVAL_MS } from './constants/GameConfig';
 import { HUD } from './ui/HUD';
 import { LobbyScreen } from './ui/LobbyScreen';
 import { RoundSummary } from './ui/RoundSummary';
@@ -39,6 +40,10 @@ const network = new NetworkClient(WS_URL);
 
 const knownBoats = new Set<string>();
 let prevStunned = false;
+let lastSentThrottle = 0;
+let lastSentSteer = 0;
+let lastSentFireNet = false;
+let lastInputSendTime = 0;
 
 window.addEventListener('keydown', (e) => {
   if (e.key === 'v' || e.key === 'V') sceneManager.toggleView();
@@ -52,6 +57,11 @@ hud.muteBtn.addEventListener('click', () => {
 
 lobby.onJoinGame((name, mode) => {
   network.connect(name, mode);
+});
+
+network.onNameTaken((name) => {
+  lobby.show();
+  lobby.updateStatus(`Name "${name}" is already in use — pick another!`);
 });
 
 network.onAssigned((playerId, roomId) => {
@@ -101,7 +111,17 @@ network.onWorldState((worldState, tiles) => {
 function animate(): void {
   if (gameState.localPlayerId) {
     const input = inputController.getInput(gameState.localPlayerId);
-    network.sendInput(input);
+    const now = performance.now();
+    const changed = input.throttle !== lastSentThrottle
+      || input.steer !== lastSentSteer
+      || (input.fireNet && !lastSentFireNet);
+    if (changed || now - lastInputSendTime >= TICK_INTERVAL_MS) {
+      network.sendInput(input);
+      lastSentThrottle = input.throttle;
+      lastSentSteer = input.steer;
+      lastSentFireNet = input.fireNet;
+      lastInputSendTime = now;
+    }
   }
 
   for (const id of knownBoats) {

@@ -2,9 +2,10 @@ import { MessageType } from '../../shared/types';
 import type { WsMessage, WorldState, InputEvent } from '../../shared/types';
 import type { TileType } from '../../shared/constants';
 
-export type StateCallback = (worldState: WorldState, tiles: TileType[][]) => void;
+export type StateCallback = (worldState: WorldState, tiles: TileType[][] | null) => void;
 export type AssignCallback = (playerId: string, roomId: string) => void;
 export type RoundCallback = (worldState: WorldState, tiles: TileType[][]) => void;
+export type NameTakenCallback = (name: string) => void;
 
 export class NetworkClient {
   private ws: WebSocket | null = null;
@@ -12,6 +13,7 @@ export class NetworkClient {
   private onAssign: AssignCallback | null = null;
   private onRoundStart: RoundCallback | null = null;
   private onRoundEndCb: ((scores: { id: string; name: string; score: number }[]) => void) | null = null;
+  private onNameTakenCb: NameTakenCallback | null = null;
   private url: string;
 
   constructor(url: string) {
@@ -52,8 +54,8 @@ export class NetworkClient {
         break;
       }
       case MessageType.STATE: {
-        const payload = msg.payload as { worldState: WorldState; tiles: TileType[][] };
-        this.onState?.(payload.worldState, payload.tiles);
+        const payload = msg.payload as { worldState: WorldState; tiles?: TileType[][] };
+        this.onState?.(payload.worldState, payload.tiles ?? null);
         break;
       }
       case MessageType.ROUND_START: {
@@ -65,6 +67,12 @@ export class NetworkClient {
       case MessageType.ROUND_END: {
         const payload = msg.payload as { scores: { id: string; name: string; score: number }[] };
         this.onRoundEndCb?.(payload.scores);
+        break;
+      }
+      case MessageType.NAME_TAKEN: {
+        const payload = msg.payload as { name: string };
+        this.onNameTakenCb?.(payload.name);
+        this.ws?.close();
         break;
       }
     }
@@ -88,6 +96,10 @@ export class NetworkClient {
 
   onRoundEnded(callback: (scores: { id: string; name: string; score: number }[]) => void): void {
     this.onRoundEndCb = callback;
+  }
+
+  onNameTaken(callback: NameTakenCallback): void {
+    this.onNameTakenCb = callback;
   }
 
   private send(msg: WsMessage): void {

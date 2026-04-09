@@ -7,7 +7,7 @@ export class GameState {
   localPlayerId: string | null = null;
   roomId: string | null = null;
 
-  updateFromServer(worldState: WorldState, tiles: TileType[][]): void {
+  updateFromServer(worldState: WorldState, tiles: TileType[][] | null): void {
     this.worldState = worldState;
     if (tiles) {
       this.tiles = tiles;

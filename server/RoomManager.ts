@@ -20,6 +20,24 @@ export class RoomManager {
   private rooms: Map<string, Room> = new Map();
   private playerToRoom: Map<string, string> = new Map();
 
+  isNameTakenInTargetRoom(name: string): boolean {
+    const normalized = (name || '').trim().toLowerCase();
+    if (!normalized) return false;
+    const room = this.peekTargetRoom();
+    if (!room) return false;
+    for (const player of room.players.values()) {
+      if (player.name.toLowerCase() === normalized) return true;
+    }
+    return false;
+  }
+
+  private peekTargetRoom(): Room | undefined {
+    for (const room of this.rooms.values()) {
+      if (room.players.size < MAX_PLAYERS_PER_ROOM) return room;
+    }
+    return undefined;
+  }
+
   addPlayer(ws: WebSocket, name: string): PlayerConnection {
     const playerId = this.generateId();
     const room = this.findOrCreateRoom();
