@@ -6,6 +6,8 @@ export type StateCallback = (worldState: WorldState, tiles: TileType[][] | null)
 export type AssignCallback = (playerId: string, roomId: string) => void;
 export type RoundCallback = (worldState: WorldState, tiles: TileType[][]) => void;
 export type NameTakenCallback = (name: string) => void;
+export type ChatCallback = (name: string, text: string, isServer: boolean) => void;
+export type PlayerEventCallback = (playerId: string, name: string, playerCount: number) => void;
 
 export class NetworkClient {
   private ws: WebSocket | null = null;
@@ -14,6 +16,9 @@ export class NetworkClient {
   private onRoundStart: RoundCallback | null = null;
   private onRoundEndCb: ((scores: { id: string; name: string; score: number }[]) => void) | null = null;
   private onNameTakenCb: NameTakenCallback | null = null;
+  private onChatCb: ChatCallback | null = null;
+  private onPlayerJoinedCb: PlayerEventCallback | null = null;
+  private onPlayerLeftCb: PlayerEventCallback | null = null;
   private url: string;
 
   constructor(url: string) {
@@ -75,6 +80,21 @@ export class NetworkClient {
         this.ws?.close();
         break;
       }
+      case MessageType.CHAT: {
+        const payload = msg.payload as { name: string; text: string; isServer: boolean };
+        this.onChatCb?.(payload.name, payload.text, payload.isServer);
+        break;
+      }
+      case MessageType.PLAYER_JOINED: {
+        const payload = msg.payload as { playerId: string; name: string; playerCount: number };
+        this.onPlayerJoinedCb?.(payload.playerId, payload.name, payload.playerCount);
+        break;
+      }
+      case MessageType.PLAYER_LEFT: {
+        const payload = msg.payload as { playerId: string; playerCount: number };
+        this.onPlayerLeftCb?.(payload.playerId, '', payload.playerCount);
+        break;
+      }
     }
   }
 
@@ -100,6 +120,22 @@ export class NetworkClient {
 
   onNameTaken(callback: NameTakenCallback): void {
     this.onNameTakenCb = callback;
+  }
+
+  onChat(callback: ChatCallback): void {
+    this.onChatCb = callback;
+  }
+
+  onPlayerJoined(callback: PlayerEventCallback): void {
+    this.onPlayerJoinedCb = callback;
+  }
+
+  onPlayerLeft(callback: PlayerEventCallback): void {
+    this.onPlayerLeftCb = callback;
+  }
+
+  sendChat(text: string): void {
+    this.send({ type: MessageType.CHAT, payload: { text } });
   }
 
   private send(msg: WsMessage): void {

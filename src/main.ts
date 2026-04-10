@@ -17,6 +17,7 @@ import { ParticleSystem } from './rendering/ParticleSystem';
 import { TreeRenderer } from './rendering/TreeRenderer';
 import { WeatherSystem } from './rendering/WeatherSystem';
 import { WakeRenderer } from './rendering/WakeRenderer';
+import { ChatBox } from './ui/ChatBox';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001/ws';
 
@@ -37,6 +38,7 @@ const particles = new ParticleSystem(sceneManager.scene);
 const treeRenderer = new TreeRenderer(sceneManager.scene);
 const weather = new WeatherSystem(sceneManager.scene, sceneManager.renderer);
 const wakeRenderer = new WakeRenderer(sceneManager.scene);
+const chatBox = new ChatBox();
 const audio = new AudioManager();
 const network = new NetworkClient(WS_URL);
 
@@ -83,6 +85,22 @@ network.onRoundStarted((worldState) => {
 
 network.onRoundEnded((scores) => {
   roundSummary.show(scores, gameState.localPlayerId ?? '');
+});
+
+chatBox.onSend((text) => {
+  network.sendChat(text);
+});
+
+network.onChat((name, text, isServer) => {
+  chatBox.addMessage(name, text, isServer);
+});
+
+network.onPlayerJoined((_id, name, count) => {
+  chatBox.addMessage('', `${name} joined (${count} players)`, true);
+});
+
+network.onPlayerLeft((_id, _name, count) => {
+  chatBox.addMessage('', `A player left (${count} remaining)`, true);
 });
 
 network.onWorldState((worldState, tiles) => {

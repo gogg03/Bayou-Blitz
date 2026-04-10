@@ -1,4 +1,5 @@
 import type { InputEvent } from '../../shared/types';
+import { ChatBox } from '../ui/ChatBox';
 
 export class InputController {
   private keys: Set<string> = new Set();
@@ -10,6 +11,7 @@ export class InputController {
   }
 
   private onKeyDown(e: KeyboardEvent): void {
+    if (ChatBox.focused) return;
     this.keys.add(e.key.toLowerCase());
 
     if (e.key === ' ') {

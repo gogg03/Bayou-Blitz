@@ -39,6 +39,9 @@ const roomManager = new RoomManager();
 const gameRooms = new Map<string, GameRoom>();
 
 const wsToPlayer = new Map<WebSocket, PlayerConnection>();
+const chatCooldowns = new Map<string, number>();
+const CHAT_COOLDOWN_MS = 1000;
+const CHAT_MAX_LEN = 120;
 
 wss.on('connection', (ws: WebSocket) => {
   console.log(`[WS] New connection`);
@@ -79,6 +82,20 @@ wss.on('connection', (ws: WebSocket) => {
         input.playerId = player.id;
         gameRooms.get(player.roomId)?.bufferInput(player.id, input);
       }
+
+      if (message.type === MessageType.CHAT) {
+        const payload = message.payload as { text?: string };
+        const text = (payload.text ?? '').trim().slice(0, CHAT_MAX_LEN);
+        if (!text) return;
+        const now = Date.now();
+        const last = chatCooldowns.get(player.id) ?? 0;
+        if (now - last < CHAT_COOLDOWN_MS) return;
+        chatCooldowns.set(player.id, now);
+        roomManager.broadcastToRoom(player.roomId, {
+          type: MessageType.CHAT,
+          payload: { name: player.name, text, isServer: false },
+        });
+      }
     } catch {
       console.error('[WS] Invalid message format');
     }
@@ -90,6 +107,7 @@ wss.on('connection', (ws: WebSocket) => {
       gameRooms.get(player.roomId)?.removeBoat(player.id);
       roomManager.removePlayer(player.id);
       wsToPlayer.delete(ws);
+      chatCooldowns.delete(player.id);
 
       const room = roomManager.getRoom(player.roomId);
       if (!room) {

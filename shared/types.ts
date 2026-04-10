@@ -65,6 +65,7 @@ export enum MessageType {
   PLAYER_LEFT = 'PLAYER_LEFT',
   ASSIGN_ID = 'ASSIGN_ID',
   NAME_TAKEN = 'NAME_TAKEN',
+  CHAT = 'CHAT',
 }
 
 export interface WsMessage {
