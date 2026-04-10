@@ -16,6 +16,7 @@ import { AudioManager } from './audio/AudioManager';
 import { ParticleSystem } from './rendering/ParticleSystem';
 import { TreeRenderer } from './rendering/TreeRenderer';
 import { WeatherSystem } from './rendering/WeatherSystem';
+import { WakeRenderer } from './rendering/WakeRenderer';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001/ws';
 
@@ -35,6 +36,7 @@ const roundSummary = new RoundSummary();
 const particles = new ParticleSystem(sceneManager.scene);
 const treeRenderer = new TreeRenderer(sceneManager.scene);
 const weather = new WeatherSystem(sceneManager.scene, sceneManager.renderer);
+const wakeRenderer = new WakeRenderer(sceneManager.scene);
 const audio = new AudioManager();
 const network = new NetworkClient(WS_URL);
 
@@ -75,6 +77,7 @@ network.onRoundStarted(() => {
   roundSummary.hide();
   mapRenderer.clear();
   treeRenderer.clear();
+  wakeRenderer.clear();
 });
 
 network.onRoundEnded((scores) => {
@@ -132,6 +135,11 @@ function animate(): void {
         sceneManager.setFollowTarget(interp.x, interp.y);
         sceneManager.setFollowRotation(interp.rotation);
       }
+      const boat = gameState.worldState?.boats.find(b => b.id === id);
+      if (boat) {
+        const spd = Math.sqrt(boat.velocity.x ** 2 + boat.velocity.y ** 2);
+        wakeRenderer.spawnWake(id, interp.x, interp.y, interp.rotation, spd);
+      }
     }
   }
 
@@ -143,6 +151,8 @@ function animate(): void {
     hud.setHotRound(gameState.worldState.isHotRound);
     hud.setWeather(gameState.worldState.weather);
     weather.setWeather(gameState.worldState.weather);
+    const darkWeather = ['night', 'storm', 'dusk'].includes(gameState.worldState.weather);
+    boatRenderer.setHeadlights(darkWeather);
     hud.updateLeaderboard(gameState.worldState.boats, gameState.localPlayerId ?? '');
 
     const localBoat = gameState.worldState.boats.find(b => b.id === gameState.localPlayerId);
@@ -164,6 +174,7 @@ function animate(): void {
     if (interp) weather.setFollowTarget(interp.x, interp.y);
   }
   boatRenderer.spinFans(1 / 60);
+  wakeRenderer.update(1 / 60);
   weather.update(1 / 60);
   particles.update(1 / 60);
   sceneManager.render();

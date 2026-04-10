@@ -10,6 +10,7 @@ export class BoatRenderer {
   private scene: THREE.Scene;
   private boatMeshes: Map<string, THREE.Group> = new Map();
   private fanGroups: Map<string, THREE.Group> = new Map();
+  private headlights: Map<string, THREE.SpotLight> = new Map();
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
@@ -89,6 +90,15 @@ export class BoatRenderer {
     crossbar.position.set(0, HULL_H + 6.2, HULL_L / 2);
     group.add(crossbar);
 
+    const headlight = new THREE.SpotLight(0xfff4d6, 3, 250, 0.5, 0.4, 1.5);
+    headlight.position.set(0, HULL_H + 3, -(HULL_L / 2));
+    const lightTarget = new THREE.Object3D();
+    lightTarget.position.set(0, 0, -(HULL_L / 2 + 120));
+    group.add(lightTarget);
+    headlight.target = lightTarget;
+    headlight.visible = false;
+    group.add(headlight);
+
     if (name) {
       const label = this.createLabel(name);
       label.position.set(0, HULL_H + 16, 0);
@@ -98,6 +108,7 @@ export class BoatRenderer {
     this.scene.add(group);
     this.boatMeshes.set(id, group);
     this.fanGroups.set(id, fanGroup);
+    this.headlights.set(id, headlight);
     return group;
   }
 
@@ -133,12 +144,19 @@ export class BoatRenderer {
     }
   }
 
+  setHeadlights(on: boolean): void {
+    for (const light of this.headlights.values()) {
+      light.visible = on;
+    }
+  }
+
   removeBoat(id: string): void {
     const group = this.boatMeshes.get(id);
     if (group) {
       this.scene.remove(group);
       this.boatMeshes.delete(id);
       this.fanGroups.delete(id);
+      this.headlights.delete(id);
     }
   }
 
