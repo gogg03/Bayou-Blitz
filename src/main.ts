@@ -66,6 +66,7 @@ lobby.onJoinGame((name, mode) => {
 
 network.onNameTaken((name) => {
   lobby.show();
+  ChatBox.enabled = false;
   lobby.updateStatus(`Name "${name}" is already in use — pick another!`);
 });
 
@@ -73,6 +74,7 @@ network.onAssigned((playerId, roomId) => {
   gameState.setPlayer(playerId, roomId);
   lobby.updateStatus(`Joined room ${roomId}`);
   lobby.hide();
+  ChatBox.enabled = true;
 });
 
 network.onRoundStarted((worldState) => {

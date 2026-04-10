@@ -16,6 +16,7 @@ interface ChatEntry {
 
 export class ChatBox {
   static focused = false;
+  static enabled = false;
 
   private container: HTMLDivElement;
   private messagesEl: HTMLDivElement;
@@ -26,7 +27,7 @@ export class ChatBox {
   constructor() {
     this.container = document.createElement('div');
     Object.assign(this.container.style, {
-      position: 'fixed', bottom: '120px', left: '18px', zIndex: '10',
+      position: 'fixed', bottom: '120px', left: '18px', zIndex: '15',
       width: '320px', pointerEvents: 'none',
     });
     document.body.appendChild(this.container);
@@ -42,7 +43,7 @@ export class ChatBox {
     this.inputEl = document.createElement('input');
     this.inputEl.type = 'text';
     this.inputEl.maxLength = 120;
-    this.inputEl.placeholder = 'Type a message...';
+    this.inputEl.placeholder = 'Press Enter to send, Esc to cancel';
     Object.assign(this.inputEl.style, {
       display: 'none', width: '100%', padding: '6px 10px',
       fontSize: '13px', fontFamily: FONT, borderRadius: '6px',
@@ -64,12 +65,12 @@ export class ChatBox {
     });
 
     window.addEventListener('keydown', (e) => {
-      if (ChatBox.focused) return;
+      if (!ChatBox.enabled || ChatBox.focused) return;
+      const tag = (document.activeElement?.tagName ?? '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
       if (e.key === 'Enter' || e.key === 't' || e.key === 'T') {
-        if (e.key === 'Enter' || e.key === 't' || e.key === 'T') {
-          e.preventDefault();
-          this.openInput();
-        }
+        e.preventDefault();
+        this.openInput();
       }
     });
   }
