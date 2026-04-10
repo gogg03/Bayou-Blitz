@@ -77,9 +77,9 @@ export class TreeRenderer {
   }
 
   private addTree(x: number, z: number, scale: number): void {
-    const mat = new THREE.MeshBasicMaterial({
+    const mat = new THREE.MeshStandardMaterial({
       map: this.texture, transparent: true, alphaTest: 0.3,
-      side: THREE.DoubleSide, depthWrite: true,
+      side: THREE.DoubleSide, depthWrite: true, roughness: 1, metalness: 0,
     });
     const h = BASE_HEIGHT * scale;
     const w = BASE_WIDTH * scale * scale * 2;
