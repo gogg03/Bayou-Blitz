@@ -51,9 +51,9 @@ const PRESETS: Record<string, WeatherPreset> = {
     rain: true, lightning: true,
   },
   desert: {
-    clearColor: 0xd4c8a0, fogColor: 0xd4c8a0, fogNear: 2000, fogFar: 3500,
-    ambientColor: 0xffe8b0, ambientIntensity: 0.8,
-    dirColor: 0xfff4d6, dirIntensity: 1.2,
+    clearColor: 0xc8b888, fogColor: 0xc8b888, fogNear: 400, fogFar: 1400,
+    ambientColor: 0xffe8b0, ambientIntensity: 0.75,
+    dirColor: 0xfff4d6, dirIntensity: 1.1,
     dirPosition: new THREE.Vector3(10, 140, 10),
     rain: false, lightning: false,
   },
