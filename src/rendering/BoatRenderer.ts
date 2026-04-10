@@ -90,10 +90,10 @@ export class BoatRenderer {
     crossbar.position.set(0, HULL_H + 6.2, HULL_L / 2);
     group.add(crossbar);
 
-    const headlight = new THREE.SpotLight(0xfff4d6, 3, 250, 0.5, 0.4, 1.5);
+    const headlight = new THREE.SpotLight(0xfff4d6, 120, 400, 0.45, 0.5, 1);
     headlight.position.set(0, HULL_H + 3, -(HULL_L / 2));
     const lightTarget = new THREE.Object3D();
-    lightTarget.position.set(0, 0, -(HULL_L / 2 + 120));
+    lightTarget.position.set(0, -2, -(HULL_L / 2 + 150));
     group.add(lightTarget);
     headlight.target = lightTarget;
     headlight.visible = false;
