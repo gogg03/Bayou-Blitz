@@ -16,7 +16,7 @@ export class BoatRenderer {
     this.scene = scene;
   }
 
-  createBoat(id: string, color: number = 0xb0b0b0, name?: string): THREE.Group {
+  createBoat(id: string, color: number = 0xb0b0b0, name?: string, isLocal = false): THREE.Group {
     const group = new THREE.Group();
     const cDark = new THREE.Color(color).multiplyScalar(0.7);
 
@@ -90,14 +90,17 @@ export class BoatRenderer {
     crossbar.position.set(0, HULL_H + 6.2, HULL_L / 2);
     group.add(crossbar);
 
-    const headlight = new THREE.SpotLight(0xfff4d6, 120, 400, 0.45, 0.5, 1);
-    headlight.position.set(0, HULL_H + 3, -(HULL_L / 2));
-    const lightTarget = new THREE.Object3D();
-    lightTarget.position.set(0, -2, -(HULL_L / 2 + 150));
-    group.add(lightTarget);
-    headlight.target = lightTarget;
-    headlight.visible = false;
-    group.add(headlight);
+    if (isLocal) {
+      const headlight = new THREE.SpotLight(0xfff4d6, 120, 400, 0.45, 0.5, 1);
+      headlight.position.set(0, HULL_H + 3, -(HULL_L / 2));
+      const lightTarget = new THREE.Object3D();
+      lightTarget.position.set(0, -2, -(HULL_L / 2 + 150));
+      group.add(lightTarget);
+      headlight.target = lightTarget;
+      headlight.visible = false;
+      group.add(headlight);
+      this.headlights.set(id, headlight);
+    }
 
     if (name) {
       const label = this.createLabel(name);
@@ -108,7 +111,6 @@ export class BoatRenderer {
     this.scene.add(group);
     this.boatMeshes.set(id, group);
     this.fanGroups.set(id, fanGroup);
-    this.headlights.set(id, headlight);
     return group;
   }
 

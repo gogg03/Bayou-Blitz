@@ -10,12 +10,19 @@ export class TreeRenderer {
   private scene: THREE.Scene;
   private treeGroup: THREE.Group;
   private texture: THREE.CanvasTexture;
+  private sharedMat: THREE.MeshLambertMaterial;
+  private sharedGeo: THREE.PlaneGeometry;
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
     this.treeGroup = new THREE.Group();
     this.scene.add(this.treeGroup);
     this.texture = this.createCypressTexture();
+    this.sharedGeo = new THREE.PlaneGeometry(1, 1);
+    this.sharedMat = new THREE.MeshLambertMaterial({
+      map: this.texture, transparent: true, alphaTest: 0.3,
+      side: THREE.DoubleSide, depthWrite: true,
+    });
   }
 
   placeAlongEdges(tiles: TileType[][]): void {
@@ -77,20 +84,17 @@ export class TreeRenderer {
   }
 
   private addTree(x: number, z: number, scale: number): void {
-    const mat = new THREE.MeshStandardMaterial({
-      map: this.texture, transparent: true, alphaTest: 0.3,
-      side: THREE.DoubleSide, depthWrite: true, roughness: 1, metalness: 0,
-    });
     const h = BASE_HEIGHT * scale;
     const w = BASE_WIDTH * scale * scale * 2;
-    const geo = new THREE.PlaneGeometry(w, h);
 
-    const p1 = new THREE.Mesh(geo, mat);
+    const p1 = new THREE.Mesh(this.sharedGeo, this.sharedMat);
     p1.position.set(x, 2.5 + h / 2, z);
+    p1.scale.set(w, h, 1);
 
-    const p2 = new THREE.Mesh(geo, mat.clone());
+    const p2 = new THREE.Mesh(this.sharedGeo, this.sharedMat);
     p2.position.set(x, 2.5 + h / 2, z);
     p2.rotation.y = Math.PI / 2;
+    p2.scale.set(w, h, 1);
 
     this.treeGroup.add(p1, p2);
   }
@@ -185,13 +189,6 @@ export class TreeRenderer {
   }
 
   clear(): void {
-    while (this.treeGroup.children.length > 0) {
-      const child = this.treeGroup.children[0];
-      this.treeGroup.remove(child);
-      if (child instanceof THREE.Mesh) {
-        child.geometry.dispose();
-        (child.material as THREE.Material).dispose();
-      }
-    }
+    this.treeGroup.clear();
   }
 }

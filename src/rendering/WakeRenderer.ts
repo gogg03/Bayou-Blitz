@@ -1,36 +1,55 @@
 import * as THREE from 'three';
 
-interface WakePuff {
-  mesh: THREE.Mesh;
-  age: number;
-  maxAge: number;
-  startScale: number;
-}
-
-const MAX_PUFFS = 120;
-const SPAWN_INTERVAL = 0.06;
+const MAX_PUFFS = 80;
+const SPAWN_INTERVAL = 0.08;
 const PUFF_LIFE = 1.8;
 const BASE_SCALE = 3;
 const END_SCALE = 14;
 const SPREAD = 5;
 const MIN_SPEED = 30;
 
+interface PooledPuff {
+  mesh: THREE.Mesh;
+  active: boolean;
+  age: number;
+  maxAge: number;
+  startScale: number;
+}
+
 export class WakeRenderer {
   private scene: THREE.Scene;
-  private puffs: WakePuff[] = [];
-  private texture: THREE.CanvasTexture;
-  private geo: THREE.PlaneGeometry;
+  private pool: PooledPuff[] = [];
   private timers: Map<string, number> = new Map();
+  private sharedMat: THREE.MeshBasicMaterial;
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
-    this.texture = this.createFoamTexture();
-    this.geo = new THREE.PlaneGeometry(1, 1);
+    const geo = new THREE.PlaneGeometry(1, 1);
+    this.sharedMat = new THREE.MeshBasicMaterial({
+      map: this.createFoamTexture(), transparent: true, opacity: 0,
+      side: THREE.DoubleSide, depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+
+    for (let i = 0; i < MAX_PUFFS; i++) {
+      const mesh = new THREE.Mesh(geo, this.sharedMat.clone());
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.visible = false;
+      scene.add(mesh);
+      this.pool.push({ mesh, active: false, age: 0, maxAge: PUFF_LIFE, startScale: BASE_SCALE });
+    }
+  }
+
+  private acquire(): PooledPuff | null {
+    for (const p of this.pool) {
+      if (!p.active) return p;
+    }
+    return null;
   }
 
   spawnWake(id: string, x: number, z: number, rotation: number, speed: number): void {
     if (speed < MIN_SPEED) return;
-    const t = (this.timers.get(id) ?? 0);
+    const t = this.timers.get(id) ?? 0;
     if (t > 0) return;
 
     const interval = SPAWN_INTERVAL * (MIN_SPEED / Math.max(speed, MIN_SPEED));
@@ -42,29 +61,21 @@ export class WakeRenderer {
     const rearZ = z - fwdZ * 14;
 
     for (const side of [-1, 1]) {
-      if (this.puffs.length >= MAX_PUFFS) break;
+      const puff = this.acquire();
+      if (!puff) break;
       const perpX = -fwdZ * side * SPREAD;
       const perpZ = fwdX * side * SPREAD;
       const jx = (Math.random() - 0.5) * 3;
       const jz = (Math.random() - 0.5) * 3;
 
-      const mat = new THREE.MeshBasicMaterial({
-        map: this.texture, transparent: true, opacity: 0.7,
-        side: THREE.DoubleSide, depthWrite: false,
-        blending: THREE.AdditiveBlending,
-      });
-      const mesh = new THREE.Mesh(this.geo, mat);
-      mesh.position.set(rearX + perpX + jx, 0.4, rearZ + perpZ + jz);
-      mesh.rotation.x = -Math.PI / 2;
-      mesh.scale.setScalar(BASE_SCALE);
-      this.scene.add(mesh);
-
-      this.puffs.push({
-        mesh,
-        age: 0,
-        maxAge: PUFF_LIFE + Math.random() * 0.4,
-        startScale: BASE_SCALE * (0.8 + Math.random() * 0.4),
-      });
+      puff.active = true;
+      puff.age = 0;
+      puff.maxAge = PUFF_LIFE + Math.random() * 0.4;
+      puff.startScale = BASE_SCALE * (0.8 + Math.random() * 0.4);
+      puff.mesh.position.set(rearX + perpX + jx, 0.4, rearZ + perpZ + jz);
+      puff.mesh.scale.setScalar(puff.startScale);
+      puff.mesh.visible = true;
+      (puff.mesh.material as THREE.MeshBasicMaterial).opacity = 0.7;
     }
   }
 
@@ -73,20 +84,17 @@ export class WakeRenderer {
       this.timers.set(id, Math.max(0, t - dt));
     }
 
-    for (let i = this.puffs.length - 1; i >= 0; i--) {
-      const p = this.puffs[i];
+    for (const p of this.pool) {
+      if (!p.active) continue;
       p.age += dt;
       if (p.age >= p.maxAge) {
-        this.scene.remove(p.mesh);
-        (p.mesh.material as THREE.Material).dispose();
-        this.puffs.splice(i, 1);
+        p.active = false;
+        p.mesh.visible = false;
         continue;
       }
       const t = p.age / p.maxAge;
-      const scale = p.startScale + (END_SCALE - p.startScale) * t;
-      p.mesh.scale.setScalar(scale);
-      const mat = p.mesh.material as THREE.MeshBasicMaterial;
-      mat.opacity = 0.55 * (1 - t * t);
+      p.mesh.scale.setScalar(p.startScale + (END_SCALE - p.startScale) * t);
+      (p.mesh.material as THREE.MeshBasicMaterial).opacity = 0.55 * (1 - t * t);
     }
   }
 
@@ -123,11 +131,10 @@ export class WakeRenderer {
   }
 
   clear(): void {
-    for (const p of this.puffs) {
-      this.scene.remove(p.mesh);
-      (p.mesh.material as THREE.Material).dispose();
+    for (const p of this.pool) {
+      p.active = false;
+      p.mesh.visible = false;
     }
-    this.puffs.length = 0;
     this.timers.clear();
   }
 }

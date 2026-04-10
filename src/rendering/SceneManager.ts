@@ -31,7 +31,7 @@ export class SceneManager {
   constructor(container: HTMLElement) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setClearColor(0x0a1a0d);
     this.renderer.autoClear = false;
     container.appendChild(this.renderer.domElement);
