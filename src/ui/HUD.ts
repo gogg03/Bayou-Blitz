@@ -128,7 +128,7 @@ export class HUD {
       color: 'rgba(224,216,200,0.6)', textAlign: 'center',
       transition: 'opacity 1.5s',
     });
-    hint.textContent = 'WASD to move  |  SPACE to fire net  |  MMB/RMB to orbit  |  V toggle view';
+    hint.textContent = 'WASD to move  |  SPACE to fire net  |  MMB/RMB to orbit  |  V toggle view  |  T/Enter to chat';
     setTimeout(() => { hint.style.opacity = '0'; }, 10000);
   }
 

@@ -91,8 +91,8 @@ export class NetworkClient {
         break;
       }
       case MessageType.PLAYER_LEFT: {
-        const payload = msg.payload as { playerId: string; playerCount: number };
-        this.onPlayerLeftCb?.(payload.playerId, '', payload.playerCount);
+        const payload = msg.payload as { playerId: string; name: string; playerCount: number };
+        this.onPlayerLeftCb?.(payload.playerId, payload.name, payload.playerCount);
         break;
       }
     }

@@ -93,6 +93,7 @@ export class RoomManager {
         type: MessageType.PLAYER_LEFT,
         payload: {
           playerId,
+          name: player?.name ?? 'Unknown',
           playerCount: room.players.size,
         },
       });

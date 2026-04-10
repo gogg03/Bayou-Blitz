@@ -50,6 +50,7 @@ let lastSentFireNet = false;
 let lastInputSendTime = 0;
 
 window.addEventListener('keydown', (e) => {
+  if (ChatBox.focused) return;
   if (e.key === 'v' || e.key === 'V') sceneManager.toggleView();
 });
 
@@ -99,8 +100,8 @@ network.onPlayerJoined((_id, name, count) => {
   chatBox.addMessage('', `${name} joined (${count} players)`, true);
 });
 
-network.onPlayerLeft((_id, _name, count) => {
-  chatBox.addMessage('', `A player left (${count} remaining)`, true);
+network.onPlayerLeft((_id, name, count) => {
+  chatBox.addMessage('', `${name} left (${count} remaining)`, true);
 });
 
 network.onWorldState((worldState, tiles) => {
