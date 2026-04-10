@@ -72,12 +72,13 @@ network.onAssigned((playerId, roomId) => {
   lobby.hide();
 });
 
-network.onRoundStarted(() => {
+network.onRoundStarted((worldState) => {
   lobby.hide();
   roundSummary.hide();
   mapRenderer.clear();
   treeRenderer.clear();
   wakeRenderer.clear();
+  hud.announceWeather(worldState.weather);
 });
 
 network.onRoundEnded((scores) => {

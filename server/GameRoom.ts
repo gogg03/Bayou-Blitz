@@ -1,6 +1,6 @@
 import { WebSocket } from 'ws';
 import { MessageType, type BoatState, type TrapState, type GatorState, type WorldState, type InputEvent, type Vec2, type NetProjectile } from '../shared/types';
-import { TICK_INTERVAL_MS, TileType, TILE_SIZE, ROUND_DURATION, HOT_ROUND_DURATION, HOT_TRAP_COUNT, HOT_GATOR_COUNT, HOT_TRAP_RESPAWN, RESULTS_DISPLAY_TIME, WEATHER_TYPES } from '../shared/constants';
+import { TICK_INTERVAL_MS, TileType, TILE_SIZE, ROUND_DURATION, HOT_ROUND_DURATION, HOT_TRAP_COUNT, HOT_GATOR_COUNT, HOT_TRAP_RESPAWN, RESULTS_DISPLAY_TIME, WEATHER_TYPES, NORMAL_WEATHER_WEIGHTS } from '../shared/constants';
 import { generateMap } from '../shared/MapGenerator';
 import { updateBoatPhysics, resolveBoatCollisions, checkTrapCollection, updateTrapTimers, checkGatorContact, tryFireNet, updateNetProjectiles } from './Physics';
 import { randomWaterPosition, updateGatorPatrolPositions } from './PhysicsHelpers';
@@ -28,7 +28,7 @@ export class GameRoom {
   constructor(room: Room, blitz = false) {
     this.room = room;
     this.isHotRound = blitz;
-    this.weather = WEATHER_TYPES[Math.floor(Math.random() * WEATHER_TYPES.length)];
+    this.weather = this.pickWeather();
     this.tiles = generateMap();
     this.roundTimer = blitz ? HOT_ROUND_DURATION : ROUND_DURATION;
     this.spawnTraps(blitz ? HOT_TRAP_COUNT : NORM_TRAPS);
@@ -94,7 +94,7 @@ export class GameRoom {
   }
 
   startRound(): void {
-    this.weather = WEATHER_TYPES[Math.floor(Math.random() * WEATHER_TYPES.length)];
+    this.weather = this.pickWeather();
     this.roundTimer = this.isHotRound ? HOT_ROUND_DURATION : ROUND_DURATION;
     this.roundActive = true;
     this.netProjectiles.length = 0;
@@ -211,6 +211,19 @@ export class GameRoom {
         player.ws.send(message);
       }
     }
+  }
+
+  private pickWeather(): string {
+    if (this.isHotRound) {
+      return WEATHER_TYPES[Math.floor(Math.random() * WEATHER_TYPES.length)];
+    }
+    const total = WEATHER_TYPES.reduce((s, w) => s + (NORMAL_WEATHER_WEIGHTS[w] ?? 1), 0);
+    let roll = Math.random() * total;
+    for (const w of WEATHER_TYPES) {
+      roll -= NORMAL_WEATHER_WEIGHTS[w] ?? 1;
+      if (roll <= 0) return w;
+    }
+    return 'day';
   }
 
   getTiles(): TileType[][] {

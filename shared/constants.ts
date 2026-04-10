@@ -26,7 +26,11 @@ export const TICK_INTERVAL_MS = 1000 / SERVER_TICK_RATE;
 
 export const RESULTS_DISPLAY_TIME = 10;
 
-export const WEATHER_TYPES = ['day', 'dusk', 'night', 'fog', 'storm'] as const;
+export const WEATHER_TYPES = ['day', 'dusk', 'night', 'fog', 'storm', 'desert'] as const;
+
+export const NORMAL_WEATHER_WEIGHTS: Record<string, number> = {
+  day: 35, desert: 15, dusk: 15, fog: 15, night: 10, storm: 10,
+};
 
 export const BOAT_ACCELERATION = 300;
 export const BOAT_REVERSE_ACCELERATION = 150;

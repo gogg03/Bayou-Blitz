@@ -50,6 +50,13 @@ const PRESETS: Record<string, WeatherPreset> = {
     dirPosition: new THREE.Vector3(40, 60, 20),
     rain: true, lightning: true,
   },
+  desert: {
+    clearColor: 0xd4c8a0, fogColor: 0xd4c8a0, fogNear: 2000, fogFar: 3500,
+    ambientColor: 0xffe8b0, ambientIntensity: 0.8,
+    dirColor: 0xfff4d6, dirIntensity: 1.2,
+    dirPosition: new THREE.Vector3(10, 140, 10),
+    rain: false, lightning: false,
+  },
 };
 
 const RAIN_COUNT = 2000;

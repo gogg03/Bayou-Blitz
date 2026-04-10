@@ -27,6 +27,7 @@ export class HUD {
   private cooldownLabel: HTMLDivElement;
   private lbBody: HTMLDivElement;
   private lbCount: HTMLSpanElement;
+  private announceBanner: HTMLDivElement;
 
   constructor() {
     const timerPanel = DIV(document.body, {
@@ -112,6 +113,15 @@ export class HUD {
     this.muteBtn.onmouseleave = () => S(this.muteBtn, { background: BG });
     document.body.appendChild(this.muteBtn);
 
+    this.announceBanner = DIV(document.body, {
+      position: 'fixed', top: '30%', left: '50%', transform: 'translate(-50%, -50%)',
+      zIndex: '20', pointerEvents: 'none', fontFamily: FONT,
+      fontSize: '42px', fontWeight: 'bold', color: TEXT, textAlign: 'center',
+      letterSpacing: '4px', opacity: '0',
+      textShadow: `0 0 20px rgba(212,146,10,0.6), 0 4px 16px rgba(0,0,0,0.8)`,
+      transition: 'opacity 0.6s',
+    });
+
     const hint = DIV(document.body, {
       position: 'fixed', bottom: '18px', left: '50%', transform: 'translateX(-50%)',
       zIndex: '10', pointerEvents: 'none', fontFamily: FONT, fontSize: '12px',
@@ -151,10 +161,18 @@ export class HUD {
   private static WEATHER_LABELS: Record<string, string> = {
     day: '\u2600 Clear Day', dusk: '\u{1F305} Dusk', night: '\u{1F319} Night',
     fog: '\u{1F32B}\uFE0F Dense Fog', storm: '\u26C8\uFE0F Storm',
+    desert: '\u{1F3DC}\uFE0F Desert Heat',
   };
 
   setWeather(weather: string): void {
     this.weatherEl.textContent = HUD.WEATHER_LABELS[weather] ?? weather;
+  }
+
+  announceWeather(weather: string): void {
+    const label = HUD.WEATHER_LABELS[weather] ?? weather;
+    this.announceBanner.textContent = label;
+    this.announceBanner.style.opacity = '1';
+    setTimeout(() => { this.announceBanner.style.opacity = '0'; }, 3000);
   }
 
   updateLeaderboard(boats: BoatState[], localId: string): void {
