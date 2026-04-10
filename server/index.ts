@@ -93,7 +93,7 @@ wss.on('connection', (ws: WebSocket) => {
         chatCooldowns.set(player.id, now);
         roomManager.broadcastToRoom(player.roomId, {
           type: MessageType.CHAT,
-          payload: { name: player.name, text, isServer: false },
+          payload: { playerId: player.id, name: player.name, text, isServer: false },
         });
       }
     } catch {

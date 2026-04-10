@@ -6,7 +6,7 @@ export type StateCallback = (worldState: WorldState, tiles: TileType[][] | null)
 export type AssignCallback = (playerId: string, roomId: string) => void;
 export type RoundCallback = (worldState: WorldState, tiles: TileType[][]) => void;
 export type NameTakenCallback = (name: string) => void;
-export type ChatCallback = (name: string, text: string, isServer: boolean) => void;
+export type ChatCallback = (playerId: string, name: string, text: string, isServer: boolean) => void;
 export type PlayerEventCallback = (playerId: string, name: string, playerCount: number) => void;
 
 export class NetworkClient {
@@ -81,8 +81,8 @@ export class NetworkClient {
         break;
       }
       case MessageType.CHAT: {
-        const payload = msg.payload as { name: string; text: string; isServer: boolean };
-        this.onChatCb?.(payload.name, payload.text, payload.isServer);
+        const payload = msg.payload as { playerId: string; name: string; text: string; isServer: boolean };
+        this.onChatCb?.(payload.playerId, payload.name, payload.text, payload.isServer);
         break;
       }
       case MessageType.PLAYER_JOINED: {

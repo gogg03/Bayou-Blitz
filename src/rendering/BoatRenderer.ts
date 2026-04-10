@@ -5,12 +5,21 @@ const HULL_W = 14;
 const HULL_H = 2;
 const RAMP_L = 8;
 const FAN_R = 7;
+const BUBBLE_Y = HULL_H + 28;
+const BUBBLE_DURATION = 6000;
+
+interface SpeechBubble {
+  sprite: THREE.Sprite;
+  timer: ReturnType<typeof setTimeout>;
+  fadeTimer?: ReturnType<typeof setTimeout>;
+}
 
 export class BoatRenderer {
   private scene: THREE.Scene;
   private boatMeshes: Map<string, THREE.Group> = new Map();
   private fanGroups: Map<string, THREE.Group> = new Map();
   private headlights: Map<string, THREE.SpotLight> = new Map();
+  private bubbles: Map<string, SpeechBubble> = new Map();
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
@@ -152,7 +161,130 @@ export class BoatRenderer {
     }
   }
 
+  showBubble(id: string, text: string): void {
+    const group = this.boatMeshes.get(id);
+    if (!group) return;
+
+    this.clearBubble(id);
+
+    const sprite = this.createBubbleSprite(text);
+    sprite.position.set(0, BUBBLE_Y, 0);
+    group.add(sprite);
+
+    const fadeTimer = setTimeout(() => {
+      sprite.material.opacity = 0;
+    }, BUBBLE_DURATION - 800);
+
+    const timer = setTimeout(() => {
+      group.remove(sprite);
+      sprite.material.dispose();
+      (sprite.material.map as THREE.Texture)?.dispose();
+      this.bubbles.delete(id);
+    }, BUBBLE_DURATION);
+
+    this.bubbles.set(id, { sprite, timer, fadeTimer });
+  }
+
+  private clearBubble(id: string): void {
+    const existing = this.bubbles.get(id);
+    if (!existing) return;
+    clearTimeout(existing.timer);
+    if (existing.fadeTimer) clearTimeout(existing.fadeTimer);
+    const group = this.boatMeshes.get(id);
+    if (group) group.remove(existing.sprite);
+    existing.sprite.material.dispose();
+    (existing.sprite.material.map as THREE.Texture)?.dispose();
+    this.bubbles.delete(id);
+  }
+
+  private createBubbleSprite(text: string): THREE.Sprite {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    const fontSize = 28;
+    const pad = 16;
+    const tailH = 10;
+    ctx.font = `bold ${fontSize}px Arial`;
+
+    const lines = this.wrapText(ctx, text, 300);
+    const lineH = fontSize + 4;
+    const textW = Math.max(...lines.map(l => ctx.measureText(l).width));
+    const boxW = textW + pad * 2;
+    const boxH = lines.length * lineH + pad * 2;
+
+    canvas.width = Math.ceil(boxW);
+    canvas.height = Math.ceil(boxH + tailH);
+
+    ctx.font = `bold ${fontSize}px Arial`;
+    ctx.fillStyle = 'rgba(10, 26, 13, 0.88)';
+    this.roundRect(ctx, 0, 0, boxW, boxH, 12);
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(212, 146, 10, 0.6)';
+    ctx.lineWidth = 2;
+    this.roundRect(ctx, 0, 0, boxW, boxH, 12);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(boxW / 2 - 8, boxH);
+    ctx.lineTo(boxW / 2, boxH + tailH);
+    ctx.lineTo(boxW / 2 + 8, boxH);
+    ctx.fillStyle = 'rgba(10, 26, 13, 0.88)';
+    ctx.fill();
+
+    ctx.fillStyle = '#e0d8c8';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], boxW / 2, pad + i * lineH);
+    }
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.minFilter = THREE.LinearFilter;
+    const mat = new THREE.SpriteMaterial({
+      map: texture, transparent: true, depthTest: false,
+      opacity: 1,
+    });
+    mat.opacity = 1;
+    const sprite = new THREE.Sprite(mat);
+    const aspect = canvas.width / canvas.height;
+    const spriteH = 14;
+    sprite.scale.set(spriteH * aspect, spriteH, 1);
+    return sprite;
+  }
+
+  private wrapText(ctx: CanvasRenderingContext2D, text: string, maxW: number): string[] {
+    const words = text.split(' ');
+    const lines: string[] = [];
+    let line = '';
+    for (const word of words) {
+      const test = line ? `${line} ${word}` : word;
+      if (ctx.measureText(test).width > maxW && line) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+    return lines.length ? lines : [''];
+  }
+
+  private roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number): void {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
   removeBoat(id: string): void {
+    this.clearBubble(id);
     const group = this.boatMeshes.get(id);
     if (group) {
       this.scene.remove(group);

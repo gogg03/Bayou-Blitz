@@ -94,8 +94,11 @@ chatBox.onSend((text) => {
   network.sendChat(text);
 });
 
-network.onChat((name, text, isServer) => {
+network.onChat((playerId, name, text, isServer) => {
   chatBox.addMessage(name, text, isServer);
+  if (!isServer && playerId) {
+    boatRenderer.showBubble(playerId, text);
+  }
 });
 
 network.onPlayerJoined((_id, name, count) => {
