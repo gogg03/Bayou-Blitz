@@ -1,3 +1,15 @@
+const S = (el: HTMLElement, s: Partial<CSSStyleDeclaration>) => Object.assign(el.style, s);
+
+const AMBER = '#d4920a';
+const AMBER_DIM = 'rgba(212,146,10,0.15)';
+const AMBER_BORDER = 'rgba(196,127,8,0.35)';
+const PANEL_BG = 'rgba(8,18,10,0.85)';
+const INPUT_BG = 'rgba(16,38,20,0.9)';
+const TEXT_MUTED = '#7a8a6e';
+const TEXT_WARM = '#9a9078';
+const TEXT_LIGHT = '#e0d8c8';
+const FONT = "'Segoe UI', Arial, sans-serif";
+
 export class LobbyScreen {
   private overlay: HTMLDivElement;
   private nameInput: HTMLInputElement;
@@ -9,161 +21,195 @@ export class LobbyScreen {
 
   constructor() {
     this.overlay = document.createElement('div');
-    Object.assign(this.overlay.style, {
+    S(this.overlay, {
       position: 'fixed', inset: '0', display: 'flex',
       flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       background: 'radial-gradient(ellipse at center, #0d2211 0%, #0a1a0d 60%, #060e07 100%)',
-      zIndex: '100', fontFamily: "'Segoe UI', Arial, sans-serif",
+      zIndex: '100', fontFamily: FONT, overflow: 'auto',
     });
 
     const vignette = document.createElement('div');
-    Object.assign(vignette.style, {
+    S(vignette, {
       position: 'absolute', inset: '0', pointerEvents: 'none',
-      boxShadow: 'inset 0 0 150px 60px rgba(0,0,0,0.7)',
+      boxShadow: 'inset 0 0 180px 80px rgba(0,0,0,0.75)',
     });
     this.overlay.appendChild(vignette);
 
     const panel = document.createElement('div');
-    Object.assign(panel.style, {
+    S(panel, {
       display: 'flex', flexDirection: 'column', alignItems: 'center',
-      background: 'rgba(10,20,12,0.6)', border: '1px solid rgba(212,146,10,0.15)',
-      borderRadius: '16px', padding: '48px 56px 36px',
-      backdropFilter: 'blur(8px)', position: 'relative', zIndex: '1',
-      boxShadow: '0 8px 40px rgba(0,0,0,0.5)',
+      background: PANEL_BG,
+      border: `1px solid ${AMBER_BORDER}`,
+      borderRadius: '16px',
+      padding: '0',
+      backdropFilter: 'blur(10px)', position: 'relative', zIndex: '1',
+      boxShadow: `0 0 60px rgba(0,0,0,0.6), 0 0 20px rgba(212,146,10,0.08)`,
+      maxWidth: '560px', width: '92%', overflow: 'hidden',
     });
     this.overlay.appendChild(panel);
 
-    const title = document.createElement('h1');
-    title.textContent = 'BAYOU BLITZ';
-    Object.assign(title.style, {
-      color: '#d4920a', fontSize: '52px', margin: '0 0 4px', fontWeight: '900',
-      letterSpacing: '6px', textShadow: '0 0 20px rgba(212,146,10,0.5), 0 4px 12px rgba(0,0,0,0.6)',
+    // --- Hero banner ---
+    const heroWrap = document.createElement('div');
+    S(heroWrap, {
+      width: '100%', position: 'relative', overflow: 'hidden',
     });
-    panel.appendChild(title);
+    panel.appendChild(heroWrap);
 
-    const tagline = document.createElement('p');
-    tagline.textContent = 'Swamp Boat Brawl';
-    Object.assign(tagline.style, {
-      color: '#7a8a6e', fontSize: '16px', margin: '0 0 20px',
-      letterSpacing: '3px', textTransform: 'uppercase' as string,
+    const heroImg = document.createElement('img');
+    heroImg.src = '/bayou-blitz-hero.png';
+    heroImg.alt = 'Bayou Blitz';
+    heroImg.draggable = false;
+    S(heroImg, {
+      width: '100%', display: 'block', objectFit: 'cover',
     });
-    panel.appendChild(tagline);
+    heroWrap.appendChild(heroImg);
+
+    const heroFade = document.createElement('div');
+    S(heroFade, {
+      position: 'absolute', bottom: '0', left: '0', right: '0', height: '50px',
+      background: `linear-gradient(to top, ${PANEL_BG}, transparent)`,
+      pointerEvents: 'none',
+    });
+    heroWrap.appendChild(heroFade);
+
+    // --- Content ---
+    const content = document.createElement('div');
+    S(content, {
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      padding: '16px 44px 28px', width: '100%', boxSizing: 'border-box',
+    });
+    panel.appendChild(content);
 
     const flavor = document.createElement('p');
     flavor.textContent = 'Navigate the bayou. Collect crawfish. Dodge gators.';
-    Object.assign(flavor.style, {
-      color: '#9a9078', fontSize: '13px', margin: '0 0 28px',
-      fontStyle: 'italic', opacity: '0.85',
+    S(flavor, {
+      color: TEXT_WARM, fontSize: '13px', margin: '0 0 22px',
+      fontStyle: 'italic', opacity: '0.85', textAlign: 'center',
+      letterSpacing: '0.5px',
     });
-    panel.appendChild(flavor);
+    content.appendChild(flavor);
 
+    // --- Name input ---
     this.nameInput = document.createElement('input');
     this.nameInput.type = 'text';
     this.nameInput.placeholder = 'Enter your name...';
     this.nameInput.maxLength = 16;
-    Object.assign(this.nameInput.style, {
-      padding: '14px 24px', fontSize: '17px', borderRadius: '10px',
-      border: '2px solid #c47f08', background: 'rgba(19,46,23,0.8)', color: '#e0d8c8',
-      outline: 'none', width: '260px', textAlign: 'center', marginBottom: '18px',
-      transition: 'border-color 0.2s, box-shadow 0.2s',
+    S(this.nameInput, {
+      padding: '13px 24px', fontSize: '16px', borderRadius: '8px',
+      border: `2px solid ${AMBER_BORDER}`, background: INPUT_BG, color: TEXT_LIGHT,
+      outline: 'none', width: '100%', textAlign: 'center', marginBottom: '12px',
+      transition: 'border-color 0.2s, box-shadow 0.2s', boxSizing: 'border-box',
     });
     this.nameInput.addEventListener('focus', () => {
-      this.nameInput.style.borderColor = '#d4920a';
-      this.nameInput.style.boxShadow = '0 0 12px rgba(212,146,10,0.3)';
+      this.nameInput.style.borderColor = AMBER;
+      this.nameInput.style.boxShadow = '0 0 14px rgba(212,146,10,0.3)';
     });
     this.nameInput.addEventListener('blur', () => {
-      this.nameInput.style.borderColor = '#c47f08';
+      this.nameInput.style.borderColor = AMBER_BORDER;
       this.nameInput.style.boxShadow = 'none';
     });
     this.nameInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') this.submit();
     });
-    panel.appendChild(this.nameInput);
+    content.appendChild(this.nameInput);
+
+    // --- Mode + Launch row ---
+    const actionRow = document.createElement('div');
+    S(actionRow, {
+      display: 'flex', gap: '10px', width: '100%', marginBottom: '12px',
+    });
+    content.appendChild(actionRow);
 
     this.modeBtn = document.createElement('button');
-    this.modeBtn.textContent = 'MODE: NORMAL';
-    Object.assign(this.modeBtn.style, {
-      padding: '8px 24px', fontSize: '13px', fontWeight: '700',
-      borderRadius: '8px', border: '1px solid rgba(196,127,8,0.4)', cursor: 'pointer',
-      background: 'rgba(19,46,23,0.8)', color: '#c47f08', letterSpacing: '2px',
-      marginBottom: '14px', transition: 'background 0.2s',
+    this.modeBtn.textContent = 'NORMAL';
+    S(this.modeBtn, {
+      padding: '12px 0', fontSize: '13px', fontWeight: '700',
+      borderRadius: '8px', border: `1px solid ${AMBER_BORDER}`, cursor: 'pointer',
+      background: INPUT_BG, color: '#c47f08', letterSpacing: '2px',
+      transition: 'background 0.2s, border-color 0.2s', flex: '0 0 110px',
     });
     this.modeBtn.addEventListener('click', () => {
       this.mode = this.mode === 'normal' ? 'blitz' : 'normal';
-      this.modeBtn.textContent = this.mode === 'blitz' ? 'MODE: BLITZ' : 'MODE: NORMAL';
-      this.modeBtn.style.background = this.mode === 'blitz' ? 'rgba(120,30,10,0.6)' : 'rgba(19,46,23,0.8)';
+      this.modeBtn.textContent = this.mode === 'blitz' ? 'BLITZ' : 'NORMAL';
+      if (this.mode === 'blitz') {
+        S(this.modeBtn, { background: 'rgba(140,35,10,0.5)', borderColor: '#c44020' });
+      } else {
+        S(this.modeBtn, { background: INPUT_BG, borderColor: AMBER_BORDER });
+      }
     });
-    panel.appendChild(this.modeBtn);
+    actionRow.appendChild(this.modeBtn);
 
     this.joinBtn = document.createElement('button');
     this.joinBtn.textContent = 'LAUNCH BOAT';
-    Object.assign(this.joinBtn.style, {
-      padding: '14px 52px', fontSize: '17px', fontWeight: '800',
-      borderRadius: '10px', border: 'none', cursor: 'pointer',
-      background: 'linear-gradient(180deg, #d4920a 0%, #a06b00 100%)',
-      color: '#0a1a0d', letterSpacing: '2px', marginBottom: '16px',
+    S(this.joinBtn, {
+      padding: '12px 0', fontSize: '16px', fontWeight: '800', flex: '1',
+      borderRadius: '8px', border: 'none', cursor: 'pointer',
+      background: `linear-gradient(180deg, ${AMBER} 0%, #a06b00 100%)`,
+      color: '#0a1a0d', letterSpacing: '2px',
       transition: 'filter 0.2s, transform 0.15s',
-      boxShadow: '0 4px 16px rgba(212,146,10,0.25)',
+      boxShadow: '0 3px 12px rgba(212,146,10,0.3)',
     });
     this.joinBtn.addEventListener('mouseenter', () => {
-      this.joinBtn.style.filter = 'brightness(1.15)';
-      this.joinBtn.style.transform = 'translateY(-1px)';
+      S(this.joinBtn, { filter: 'brightness(1.15)', transform: 'translateY(-1px)' });
     });
     this.joinBtn.addEventListener('mouseleave', () => {
-      this.joinBtn.style.filter = 'brightness(1)';
-      this.joinBtn.style.transform = 'translateY(0)';
+      S(this.joinBtn, { filter: 'brightness(1)', transform: 'translateY(0)' });
     });
     this.joinBtn.addEventListener('mousedown', () => {
-      this.joinBtn.style.filter = 'brightness(0.85)';
-      this.joinBtn.style.transform = 'translateY(1px)';
+      S(this.joinBtn, { filter: 'brightness(0.85)', transform: 'translateY(1px)' });
     });
     this.joinBtn.addEventListener('mouseup', () => {
-      this.joinBtn.style.filter = 'brightness(1.15)';
-      this.joinBtn.style.transform = 'translateY(-1px)';
+      S(this.joinBtn, { filter: 'brightness(1.15)', transform: 'translateY(-1px)' });
     });
     this.joinBtn.addEventListener('click', () => this.submit());
-    panel.appendChild(this.joinBtn);
+    actionRow.appendChild(this.joinBtn);
 
+    // --- Status ---
     this.statusEl = document.createElement('div');
-    Object.assign(this.statusEl.style, {
-      color: '#9a9078', fontSize: '14px', minHeight: '20px', marginBottom: '8px',
+    S(this.statusEl, {
+      color: TEXT_WARM, fontSize: '14px', minHeight: '20px',
+      textAlign: 'center',
     });
-    panel.appendChild(this.statusEl);
+    content.appendChild(this.statusEl);
 
+    // --- Divider ---
     const divider = document.createElement('div');
-    Object.assign(divider.style, {
-      width: '100%', height: '1px', margin: '12px 0 16px',
-      background: 'linear-gradient(90deg, transparent, rgba(212,146,10,0.25), transparent)',
+    S(divider, {
+      width: '100%', height: '1px', margin: '8px 0 12px',
+      background: `linear-gradient(90deg, transparent, rgba(212,146,10,0.2), transparent)`,
     });
-    panel.appendChild(divider);
+    content.appendChild(divider);
 
+    // --- Controls ---
     const controlsWrap = document.createElement('div');
-    Object.assign(controlsWrap.style, {
-      display: 'flex', gap: '28px', justifyContent: 'center', flexWrap: 'wrap',
+    S(controlsWrap, {
+      display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap',
     });
-    panel.appendChild(controlsWrap);
+    content.appendChild(controlsWrap);
 
     const controls: [string, string][] = [
-      ['WASD', 'Move'], ['SPACE', 'Fire Net'], ['MMB/RMB', 'Orbit Camera'],
+      ['WASD', 'Move'], ['SPACE', 'Fire Net'],
+      ['MMB/RMB', 'Orbit'], ['T', 'Chat'],
     ];
     for (const [key, action] of controls) {
       const item = document.createElement('div');
-      Object.assign(item.style, {
-        display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px',
+      S(item, {
+        display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px',
       });
 
       const badge = document.createElement('span');
       badge.textContent = key;
-      Object.assign(badge.style, {
-        background: 'rgba(212,146,10,0.15)', color: '#c47f08',
-        padding: '3px 8px', borderRadius: '4px', fontWeight: '700',
-        fontSize: '11px', letterSpacing: '1px', border: '1px solid rgba(196,127,8,0.3)',
+      S(badge, {
+        background: AMBER_DIM, color: '#c47f08',
+        padding: '2px 7px', borderRadius: '4px', fontWeight: '700',
+        fontSize: '10px', letterSpacing: '1px',
+        border: `1px solid rgba(196,127,8,0.25)`,
       });
       item.appendChild(badge);
 
       const label = document.createElement('span');
       label.textContent = action;
-      label.style.color = '#7a8a6e';
+      label.style.color = TEXT_MUTED;
       item.appendChild(label);
 
       controlsWrap.appendChild(item);
